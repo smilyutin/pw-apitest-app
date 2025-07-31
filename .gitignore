@@ -1,0 +1,31 @@
+# dependency directories
+node_modules/
+# build outputs
+dist/
+build/
+coverage/
+playwright-report/
+# environment files
+.env
+.env.*.local
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+# OS files
+.DS_Store
+Thumbs.db
+# IDE/editor settings
+.vscode/
+.idea/
+# Python caches (if any)
+__pycache__/
+*.py[cod]
+# TypeScript cache
+*.tsbuildinfo
+# misc
+*.log
+# Playwright test artifacts
+test-results/
+.last-run.json
+error-context.md
