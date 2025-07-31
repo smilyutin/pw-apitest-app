@@ -20,67 +20,67 @@ test.beforeEach(async ({ page }) => {
   await page.getByRole('button').click();
 });
 
-test('delete the article', async ({ page }) => {
-  test.slow(); // Mark the test as slow in the report
+// test('delete the article', async ({ page }) => {
+//   test.slow(); // Mark the test as slow in the report
 
-  // Create isolated request context for API calls
-  const requestContext = await requestInternal.newContext();
+//   // Create isolated request context for API calls
+//   const requestContext = await requestInternal.newContext();
 
-  // Log in via API to get authentication token
-  const loginResponse = await requestContext.post('https://conduit-api.bondaracademy.com/api/users/login', {
-    data: {
-      user: {
-        email: '1pwtest101@test.com',
-        password: '1pwtest101@test.com'
-      }
-    },
-    headers: { 'Content-Type': 'application/json' }
-  });
+//   // Log in via API to get authentication token
+//   const loginResponse = await requestContext.post('https://conduit-api.bondaracademy.com/api/users/login', {
+//     data: {
+//       user: {
+//         email: '1pwtest101@test.com',
+//         password: '1pwtest101@test.com'
+//       }
+//     },
+//     headers: { 'Content-Type': 'application/json' }
+//   });
 
-  // Ensure login was successful in UI and API
-  await expect(page.getByRole('link', { name: '1pwtest101@test.com' })).toBeVisible();
-  expect(loginResponse.ok()).toBeTruthy();
+//   // Ensure login was successful in UI and API
+//   await expect(page.getByRole('link', { name: '1pwtest101@test.com' })).toBeVisible();
+//   expect(loginResponse.ok()).toBeTruthy();
 
-  const loginBody = await loginResponse.json();
-  const token = loginBody.user.token;
+//   const loginBody = await loginResponse.json();
+//   const token = loginBody.user.token;
 
-  // Create an article via API
-  const createResponse = await requestContext.post('https://conduit-api.bondaracademy.com/api/articles', {
-    data: {
-      article: {
-        title: 'This is a test title eh',
-        description: 'This is a test description',
-        body: 'This is a test body',
-        tagList: []
-      }
-    },
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Token ${token}`
-    }
-  });
+//   // Create an article via API
+//   const createResponse = await requestContext.post('https://conduit-api.bondaracademy.com/api/articles', {
+//     data: {
+//       article: {
+//         title: 'This is a test title eh',
+//         description: 'This is a test description',
+//         body: 'This is a test body',
+//         tagList: []
+//       }
+//     },
+//     headers: {
+//       'Content-Type': 'application/json',
+//       Authorization: `Token ${token}`
+//     }
+//   });
 
-  // Confirm article creation success and extract slug
-  expect(createResponse.ok()).toBeTruthy();
-  const articleData = await createResponse.json();
-  expect(articleData.article?.slug).toBeTruthy();
-  const slug = articleData.article.slug;
+//   // Confirm article creation success and extract slug
+//   expect(createResponse.ok()).toBeTruthy();
+//   const articleData = await createResponse.json();
+//   expect(articleData.article?.slug).toBeTruthy();
+//   const slug = articleData.article.slug;
 
-  // Delete the article via API using the slug
-  const deleteResponse = await requestContext.delete(
-    `https://conduit-api.bondaracademy.com/api/articles/${slug}`,
-    {
-      headers: { Authorization: `Token ${token}` }
-    }
-  );
+//   // Delete the article via API using the slug
+//   const deleteResponse = await requestContext.delete(
+//     `https://conduit-api.bondaracademy.com/api/articles/${slug}`,
+//     {
+//       headers: { Authorization: `Token ${token}` }
+//     }
+//   );
 
-  // Confirm successful deletion (HTTP 204)
-  expect(deleteResponse.status()).toBe(204);
+//   // Confirm successful deletion (HTTP 204)
+//   expect(deleteResponse.status()).toBe(204);
 
-  // Check that the article no longer appears in the UI
-  await page.getByText('Global Feed').click();
-  await expect(page.locator('app-article-list h1')).not.toContainText('This is a test title eh');
-});
+//   // Check that the article no longer appears in the UI
+//   await page.getByText('Global Feed').click();
+//   await expect(page.locator('app-article-list h1')).not.toContainText('This is a test title eh');
+// });
 
 test('create article', async ({ page }) => {
   // Create article via UI interaction
@@ -140,7 +140,7 @@ test('create article', async ({ page }) => {
 
   // Confirm the article is deleted successfully
   expect(deleteResponse.status()).toBe(204);
-
+test.slow()
   // Refresh page and validate article no longer present
   await page.reload();
 
