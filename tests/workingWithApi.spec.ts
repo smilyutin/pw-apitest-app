@@ -1,9 +1,8 @@
-import { test, expect, request as requestInternal } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import tags from '../test-data/tags.json';
 
-// Run before each test
 test.beforeEach(async ({ page }) => {
-  // Mock the /api/tags endpoint with local tag data to isolate external dependency
+  // 1️⃣ Mock the /api/tags endpoint to avoid real backend dependency
   await page.route('**/api/tags*', route => {
     route.fulfill({
       status: 200,
@@ -12,143 +11,97 @@ test.beforeEach(async ({ page }) => {
     });
   });
 
-  // Navigate to application and perform UI login
+  // 2️⃣ Navigate to the application as an already logged-in user
+  // Login is handled via storageState from .auth/user.json
   await page.goto('https://conduit.bondaracademy.com/');
-  await page.getByText('Sign in').click();
-  await page.getByRole('textbox', { name: 'Email' }).fill('1pwtest101@test.com');
-  await page.getByRole('textbox', { name: 'Password' }).fill('1pwtest101@test.com');
-  await page.getByRole('button').click();
 });
 
-// test('delete the article', async ({ page }) => {
-//   test.slow(); // Mark the test as slow in the report
 
-//   // Create isolated request context for API calls
-//   const requestContext = await requestInternal.newContext();
+// ===============================
+// DELETE ARTICLE TEST
+// ===============================
+test('delete article via API creation and UI deletion', async ({ page, request }) => {
+  test.slow();
 
-//   // Log in via API to get authentication token
-//   const loginResponse = await requestContext.post('https://conduit-api.bondaracademy.com/api/users/login', {
-//     data: {
-//       user: {
-//         email: '1pwtest101@test.com',
-//         password: '1pwtest101@test.com'
-//       }
-//     },
-//     headers: { 'Content-Type': 'application/json' }
-//   });
+  /**
+   * Step 1: Create article via API (Authorization auto-attached)
+   */
+  const createResponse = await request.post('https://conduit-api.bondaracademy.com/api/articles', {
+    data: {
+      article: {
+        title: 'Delete Me Article',
+        description: 'Created via API for UI deletion test',
+        body: 'This article will be deleted in the test.',
+        tagList: []
+      },
+    },
+  });
 
-//   // Ensure login was successful in UI and API
-//   await expect(page.getByRole('link', { name: '1pwtest101@test.com' })).toBeVisible();
-//   expect(loginResponse.ok()).toBeTruthy();
+  expect(createResponse.ok()).toBeTruthy();
+  const createBody = await createResponse.json();
+  const slug = createBody.article.slug;
+  console.log(`✅ Article created via API with slug: ${slug}`);
 
-//   const loginBody = await loginResponse.json();
-//   const token = loginBody.user.token;
+  /**
+   * Step 2: Visit article in UI and delete it
+   */
+  await page.goto(`https://conduit.bondaracademy.com/article/${slug}`);
+  await expect(page.locator('.article-page h1')).toContainText('Delete Me Article');
 
-//   // Create an article via API
-//   const createResponse = await requestContext.post('https://conduit-api.bondaracademy.com/api/articles', {
-//     data: {
-//       article: {
-//         title: 'This is a test title eh',
-//         description: 'This is a test description',
-//         body: 'This is a test body',
-//         tagList: []
-//       }
-//     },
-//     headers: {
-//       'Content-Type': 'application/json',
-//       Authorization: `Token ${token}`
-//     }
-//   });
+  console.log('✅ EXPECT PASSED: Article is visible in the UI before deletion');
 
-//   // Confirm article creation success and extract slug
-//   expect(createResponse.ok()).toBeTruthy();
-//   const articleData = await createResponse.json();
-//   expect(articleData.article?.slug).toBeTruthy();
-//   const slug = articleData.article.slug;
+  // Click the "Delete Article" button (red outline)
+  await page.locator('button.btn-outline-danger').first().click();
 
-//   // Delete the article via API using the slug
-//   const deleteResponse = await requestContext.delete(
-//     `https://conduit-api.bondaracademy.com/api/articles/${slug}`,
-//     {
-//       headers: { Authorization: `Token ${token}` }
-//     }
-//   );
+  /**
+   * Step 3: Refresh feed and verify article is gone
+   */
+  await page.reload();
+  await page.getByText('Global Feed').click();
 
-//   // Confirm successful deletion (HTTP 204)
-//   expect(deleteResponse.status()).toBe(204);
+  await expect(page.locator('app-article-list h1', { hasText: 'Delete Me Article' }))
+    .toHaveCount(0);
+  console.log('✅ EXPECT PASSED: Article successfully deleted and not visible in UI');
+});
 
-//   // Check that the article no longer appears in the UI
-//   await page.getByText('Global Feed').click();
-//   await expect(page.locator('app-article-list h1')).not.toContainText('This is a test title eh');
-// });
 
-test('create article', async ({ page }) => {
-  // Create article via UI interaction
+// ===============================
+// CREATE ARTICLE TEST
+// ===============================
+test('create article and clean up via API', async ({ page, request }) => {
+  test.slow();
+
+  // Step 1: Prepare listener for article POST request BEFORE clicking Publish
+  const postPromise = page.waitForResponse(resp =>
+    resp.url().includes('/api/articles') && resp.request().method() === 'POST'
+  );
+
+  // Step 2: Create new article via UI
   await page.getByText('New Article').click();
   await page.getByRole('textbox', { name: 'Article Title' }).fill('Playwright is awesome');
   await page.getByRole('textbox', { name: "What's this article about?" }).fill('About the Playwright');
   await page.getByRole('textbox', { name: 'Write your article (in markdown)' }).fill('We like to use PW for automation');
   await page.getByRole('button', { name: 'Publish Article' }).click();
 
-  // Wait for POST response and validate slug returned
-  const articleResponse = await page.waitForResponse(resp =>
-    resp.url().includes('/api/articles') && resp.request().method() === 'POST'
-  );
-
+  // Step 3: Wait for POST /api/articles response (listener was set before click)
+  const articleResponse = await postPromise;
   const articleResponseBody = await articleResponse.json();
-  expect(articleResponseBody.article?.slug).toBeTruthy();
   const slugId = articleResponseBody.article.slug;
+  console.log(`✅ Article created via UI with slug: ${slugId}`);
 
-  // Validate that article is shown in UI
+  // Step 4: Validate article appears in UI
   await expect(page.locator('.article-page h1')).toContainText('Playwright is awesome');
-  await page.getByText('Home').click();
-  await page.getByText('Global Feed').click();
 
-  test.slow(); // Mark the test as slow for visibility
-
-  // Confirm article presence in feed with visual log
-  try {
-    await expect(page.locator('app-article-list h1').first()).toContainText('Playwright is awesome');
-    console.log('✅ EXPECT PASSED: Article \'Playwright is awesome\' created successfully');
-  } catch (error) {
-    console.error('❌ EXPECT FAILED: Article \'Playwright is awesome\' was not found in the list');
-    throw error;
-  }
-
-  // Cleanup: Log in via API and delete the article
-  const requestContext = await requestInternal.newContext();
-  const loginResponse = await requestContext.post('https://conduit-api.bondaracademy.com/api/users/login', {
-    data: {
-      user: {
-        email: '1pwtest101@test.com',
-        password: '1pwtest101@test.com'
-      }
-    },
-    headers: { 'Content-Type': 'application/json' }
-  });
-
-  expect(loginResponse.ok()).toBeTruthy();
-  const loginJson = await loginResponse.json();
-  const accessToken = loginJson.user.token;
-
-  const deleteResponse = await requestContext.delete(
-    `https://conduit-api.bondaracademy.com/api/articles/${slugId}`,
-    {
-      headers: { Authorization: `Token ${accessToken}` }
-    }
+  // Step 5: Delete article via API using token from storageState (token-driven)
+  const deleteResponse = await request.delete(
+    `https://conduit-api.bondaracademy.com/api/articles/${slugId}`
   );
-
-  // Confirm the article is deleted successfully
   expect(deleteResponse.status()).toBe(204);
-test.slow()
-  // Refresh page and validate article no longer present
-  await page.reload();
+  console.log('✅ Article deleted via API');
 
-  try {
-    await expect(page.locator('app-article-list h1', { hasText: 'Playwright is awesome' })).toHaveCount(0);
-    console.log('✅ EXPECT PASSED: Article was successfully deleted and removed from the list');
-  } catch (error) {
-    console.error('❌ EXPECT FAILED: Deleted article still appears in the UI');
-    throw error;
-  }
+  // Step 6: Confirm article is gone from feed
+  await page.goto('https://conduit.bondaracademy.com/');
+  await page.getByText('Global Feed').click();
+  await expect(page.locator('app-article-list h1', { hasText: 'Playwright is awesome' })).toHaveCount(0);
+  console.log('✅ EXPECT PASSED: Article successfully removed from the UI feed');
 });

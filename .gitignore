@@ -1,10 +1,16 @@
 # dependency directories
 node_modules/
+# Playwright test artifacts
+/test-results/
+/playwright-report/
+/playwright/.caches/
+.last-run.json
+error-context.md
 # build outputs
 dist/
 build/
 coverage/
-playwright-report/
+
 # environment files
 .env
 .env.*.local
@@ -25,7 +31,3 @@ __pycache__/
 *.tsbuildinfo
 # misc
 *.log
-# Playwright test artifacts
-test-results/
-.last-run.json
-error-context.md
