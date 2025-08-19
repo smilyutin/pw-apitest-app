@@ -49,5 +49,7 @@ export default defineConfig({
     { name: 'regression', testIgnore: 'likesCounter.spec.ts', use: { ...devices['Desktop Chrome'], storageState: '.auth/user.json' }, dependencies: ['setup'] },
 
     { name: 'likeCounterGlobal', testMatch: 'likesCounterGlobal.spec.ts', use: { ...devices['Desktop Chrome'], storageState: '.auth/user.json' }},
+  
+    { name: 'security',   testMatch: 'tests/security/*.ts',   use: { ...devices['Desktop Chrome'] }},
   ],
 });
