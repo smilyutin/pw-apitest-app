@@ -1,5 +1,5 @@
 // tests/articleCleanUp.setup.ts
-import { test as teardown, expect } from '@playwright/test';
+import { test as teardown, expect } from './fixture/authed-request';
 import fs from 'fs';
 
 const slugFile = '.auth/article.json';

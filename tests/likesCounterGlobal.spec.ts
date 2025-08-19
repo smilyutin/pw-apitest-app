@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixture/authed-request';
 import fs from 'fs';
 
 const slugFile = '.auth/article.json';

@@ -1,4 +1,4 @@
-import { test as setup, expect, request } from '@playwright/test';
+import { test as setup, expect } from './fixture/authed-request';
 import user from '../.auth/user.json'
 import fs from 'fs'
 
