@@ -6,6 +6,10 @@ node_modules/
 /playwright/.caches/
 .last-run.json
 error-context.md
+.auth/
+.user.json
+.article.json
+.globalArticle.json
 # build outputs
 dist/
 build/
