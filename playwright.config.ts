@@ -1,6 +1,7 @@
 // playwright.config.ts
 import { defineConfig, devices } from '@playwright/test';
 import fs from 'fs';
+import { getCreds } from './utils/creds';
 
 // Load JWT token
 let extraHeaders = {};
@@ -14,7 +15,9 @@ try {
 } catch {
   console.warn('⚠️ Token not loaded, setup will run first.');
 }
-
+const { baseUrl } = (() => {
+  try { return getCreds(); } catch { return { baseUrl: undefined }; }
+})();
 export default defineConfig({
   testDir: './tests',
   testMatch: ['**/*.spec.ts'], // Only real specs show in Test Explorer
@@ -24,9 +27,10 @@ export default defineConfig({
   workers: 1,
   reporter: [['list']],
   use: {
+    baseURL: process.env.BASE_URL || baseUrl || 'https://conduit.bondaracademy.com',
+    storageState: '.auth/user.json',
     headless: false,
     trace: 'on-first-retry',
-    storageState: '.auth/user.json',
     extraHTTPHeaders: extraHeaders,
   },
   globalSetup: require.resolve('./global-setup.ts'),

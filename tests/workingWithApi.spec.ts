@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixture/authed-request';
 import tags from '../test-data/tags.json';
 
 test.beforeEach(async ({ page }) => {

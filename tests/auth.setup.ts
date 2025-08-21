@@ -1,6 +1,8 @@
-import { test as setup, expect, request } from '@playwright/test';
+import { test as setup, expect } from './fixture/authed-request';
 import user from '../.auth/user.json'
 import fs from 'fs'
+import { getCreds } from '../utils/creds';
+
 
 // ============================================================
 // AUTH SETUP SCRIPT
@@ -21,6 +23,7 @@ const authFile = '.auth/user.json';
 // Named "authentication" to indicate this setup handles login & state saving
 // Named setup test that only runs once before dependent projects
 setup('authentication', async ({ request }) => {
+  const { email, password } = getCreds();
     // // 1️⃣ Navigate to the Conduit web app
     // await page.goto('https://conduit.bondaracademy.com/');
 
@@ -49,15 +52,10 @@ setup('authentication', async ({ request }) => {
   // 1️⃣ Log in via API
   // Using API login is faster, avoids flaky UI steps, and works in headless mode.
   // ------------------------------------------------------------
-  const loginResponse = await request.post(
+const loginResponse = await request.post(
     'https://conduit-api.bondaracademy.com/api/users/login',
     {
-      data: {
-        user: {
-          email: '1pwtest101@test.com',
-          password: '1pwtest101@test.com',
-        },
-      },
+      data: { user: { email, password } },
       headers: { 'Content-Type': 'application/json' },
     }
   );
