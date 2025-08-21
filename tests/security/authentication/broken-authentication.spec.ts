@@ -1,6 +1,6 @@
 // tests/security/broken-authentication.spec.ts
 import { test, expect, request } from '@playwright/test';
-import { accessToken } from '../../utils/token';
+import { accessToken } from '../../../utils/token';
 
 const BASE_URL = 'https://conduit-api.bondaracademy.com';
 

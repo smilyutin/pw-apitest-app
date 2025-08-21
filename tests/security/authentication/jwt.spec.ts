@@ -1,6 +1,6 @@
 import { test, expect, request as pwRequest } from '@playwright/test';
 import fs from 'fs';
-import { parseJwt, withAlgNone, withPayloadMutation, withBrokenSignature } from '../../utils/jwt-utils';
+import { parseJwt, withAlgNone, withPayloadMutation, withBrokenSignature } from '../../../utils/jwt-utils';
 
 const BASE_URL = 'https://conduit-api.bondaracademy.com';
 const AUTH_FILE = '.auth/user.json';
