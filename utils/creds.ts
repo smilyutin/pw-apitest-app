@@ -8,35 +8,38 @@ export type Creds = {
   email: string;
   password: string;
   baseUrl?: string;
+  role: string;
 };
 
-let cached: Creds | null = null;
+// Simple in-memory cache (per role)
+const cache: Record<string, Creds> = {};
 
-export function getCreds(): Creds {
-  if (cached) return cached;
+export function getCreds(role: 'user' | 'admin' = 'user'): Creds {
+  if (cache[role]) return cache[role];
 
-  // Prefer file
-  const filePath = path.join(process.cwd(), '.auth', 'creds.json');
+  // Default: look inside .secrets
+  const secretsPath = path.join(process.cwd(), '.secrets', `${role}.creds.json`);
   let fileCreds: Partial<Creds> = {};
+
   try {
-    if (fs.existsSync(filePath)) {
-      fileCreds = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    if (fs.existsSync(secretsPath)) {
+      fileCreds = JSON.parse(fs.readFileSync(secretsPath, 'utf-8'));
     }
-  } catch (e) {
-    // ignore parse errors; will rely on env
+  } catch (err) {
+    console.warn(`⚠️ Could not read ${secretsPath}:`, err);
   }
 
-  // Allow environment overrides (CI-friendly)
-  const email = process.env.PW_EMAIL ?? fileCreds.email;
-  const password = process.env.PW_PASSWORD ?? fileCreds.password;
+  // Allow environment overrides (CI/CD friendly)
+  const email = process.env[`PW_${role.toUpperCase()}_EMAIL`] ?? fileCreds.email;
+  const password = process.env[`PW_${role.toUpperCase()}_PASSWORD`] ?? fileCreds.password;
   const baseUrl = process.env.PW_BASE_URL ?? fileCreds.baseUrl;
 
   if (!email || !password) {
     throw new Error(
-      'Missing credentials. Provide .auth/creds.json or set PW_EMAIL & PW_PASSWORD env vars.'
+      `Missing ${role} credentials. Provide .secrets/${role}.creds.json or set PW_${role.toUpperCase()}_EMAIL & PW_${role.toUpperCase()}_PASSWORD env vars.`
     );
   }
 
-  cached = { email, password, baseUrl };
-  return cached;
+  cache[role] = { email, password, baseUrl, role };
+  return cache[role];
 }

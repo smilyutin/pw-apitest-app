@@ -1,94 +1,130 @@
-import { test as setup, expect } from './fixture/authed-request';
-import user from '../.auth/user.json'
-import fs from 'fs'
+// tests/auth.setup.ts
+import { test as setup, expect, request, APIRequestContext } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
 import { getCreds } from '../utils/creds';
 
+const API = 'https://conduit-api.bondaracademy.com';
+const AUTH_FILE = path.join(process.cwd(), '.auth', 'user.json');
 
-// ============================================================
-// AUTH SETUP SCRIPT
-// ============================================================
-// This script runs before your Playwright projects to:
-// 1. Log in via API (faster & more stable than UI login)
-// 2. Save the authentication token to `.auth/user.json`
-// 3. Update process.env.ACCESS_TOKEN for token-driven API calls
-//
-// After this script runs, your test projects can:
-// - Use `storageState: '.auth/user.json'` to start as logged-in
-// - Attach the token to API requests automatically via extraHTTPHeaders
-// ============================================================
+function ensureAuthFileSkeleton() {
+  if (!fs.existsSync(path.dirname(AUTH_FILE))) fs.mkdirSync(path.dirname(AUTH_FILE), { recursive: true });
+  if (!fs.existsSync(AUTH_FILE)) {
+    fs.writeFileSync(
+      AUTH_FILE,
+      JSON.stringify(
+        {
+          origins: [
+            {
+              origin: 'https://conduit.bondaracademy.com',
+              localStorage: [{ name: 'jwtToken', value: '' }],
+            },
+          ],
+        },
+        null,
+        2
+      )
+    );
+  }
+}
 
-// Path where authenticated browser state is saved
-const authFile = '.auth/user.json';
+async function newApi(): Promise<APIRequestContext> {
+  // IMPORTANT: isolate from global headers/storage
+  return await request.newContext({
+    baseURL: API,
+    extraHTTPHeaders: {}, // prevent Authorization bleed
+  });
+}
 
-// Named "authentication" to indicate this setup handles login & state saving
-// Named setup test that only runs once before dependent projects
-setup('authentication', async ({ request }) => {
-  const { email, password } = getCreds();
-    // // 1️⃣ Navigate to the Conduit web app
-    // await page.goto('https://conduit.bondaracademy.com/');
-
-    // // 2️⃣ Go to the "Sign in" page
-    // await page.getByText('Sign in').click();
-
-    // // 3️⃣ Fill in user credentials
-    // await page.getByRole('textbox', { name: 'Email' }).fill('1pwtest101@test.com');
-    // await page.getByRole('textbox', { name: 'Password' }).fill('1pwtest101@test.com');
-
-    // // 4️⃣ Click the Sign in button
-    // await page.getByRole('button').click();
-
-    // // 5️⃣ Wait for a known network request to confirm that login succeeded
-    // // Here we wait for /api/tags which loads after a successful login
-    // await page.waitForResponse('https://conduit-api.bondaracademy.com/api/tags');
-
-    // // 6️⃣ Save the current browser storage state (cookies & local storage)
-    // // This allows all subsequent tests to start as an already logged-in user
-    // await page.context().storageState({ path: authFile });
-
-    // // ✅ After running this setup, your tests can reference `storageState: '.auth/user.json'` in playwright.config.ts
-    // // to skip UI login and run in an authenticated session
-
-    // ------------------------------------------------------------
-  // 1️⃣ Log in via API
-  // Using API login is faster, avoids flaky UI steps, and works in headless mode.
-  // ------------------------------------------------------------
-const loginResponse = await request.post(
-    'https://conduit-api.bondaracademy.com/api/users/login',
-    {
-      data: { user: { email, password } },
-      headers: { 'Content-Type': 'application/json' },
+async function bodyPreview(res: any, limit = 800) {
+  try {
+    const ct = res.headers()['content-type'] || '';
+    if (/application\/json/i.test(ct)) {
+      const j = await res.json();
+      return JSON.stringify(j, null, 2).slice(0, limit);
     }
-  );
+    const t = await res.text();
+    return t.slice(0, limit);
+  } catch {
+    return '<unreadable>';
+  }
+}
 
-  // Validate API login response
-  expect(loginResponse.ok()).toBeTruthy();
+async function login(ctx: APIRequestContext, email: string, password: string) {
+  const payload = { user: { email, password } };
+  const headers = { 'Content-Type': 'application/json' };
 
-  // Parse the JSON response to extract the token
-  const loginBody = await loginResponse.json();
-  const accessToken = loginBody.user.token;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    const res = await ctx.post('/api/users/login', { data: payload, headers });
+    console.log(`🔐 login status=${res.status()} (attempt ${attempt})`);
+    if (res.ok()) return await res.json();
+
+    const st = res.status();
+    if (![429, 500, 502, 503].includes(st)) {
+      // non-transient: surface details
+      const preview = await bodyPreview(res);
+      throw new Error(`Login failed (${st}). Headers=${JSON.stringify(res.headers(), null, 2)}\nBody:\n${preview}`);
+    }
+    await new Promise((r) => setTimeout(r, 600 * attempt)); // small backoff
+  }
+  throw new Error('Login failed after retries (likely rate limit / transient issues).');
+}
+
+async function register(ctx: APIRequestContext, email: string, password: string, username: string) {
+  const headers = { 'Content-Type': 'application/json' };
+  const res = await ctx.post('/api/users', {
+    headers,
+    data: { user: { email, password, username } },
+  });
+  console.log(`📝 register status=${res.status()}`);
+  // API may return 422 if user exists—treat as OK for idempotency
+  if (![200, 201, 422].includes(res.status())) {
+    const preview = await bodyPreview(res);
+    throw new Error(`Register failed (${res.status()}). Body:\n${preview}`);
+  }
+}
+
+setup('authentication', async () => {
+  const { email, password } = getCreds('user'); // or 'admin' if you prefer
+  console.log(`👤 Using credentials for ${email}`);
+
+  ensureAuthFileSkeleton();
+
+  const ctx = await newApi();
+
+  // Try login first
+  let token: string | undefined;
+  try {
+    const lr = await login(ctx, email, password);
+    token = lr?.user?.token;
+  } catch (e) {
+    console.warn('⚠️ Login failed, will try register -> login. Details:\n' + (e as Error).message);
+  }
+
+  if (!token) {
+    const username = email.split('@')[0];
+    await register(ctx, email, password, username);
+    const lr2 = await login(ctx, email, password);
+    token = lr2?.user?.token;
+  }
+
+  expect(token, 'No token returned from login').toBeTruthy();
   console.log('🔹 Access token successfully retrieved from API login');
 
-  // ------------------------------------------------------------
-  // 2️⃣ Update the local .auth JSON to store the token
-  // This allows Playwright to reuse the session for UI tests.
-  // ------------------------------------------------------------
-  // Update the token in the imported `.auth/user.json` object
-  // Assumes token is stored in localStorage[0].value
-  user.origins[0].localStorage[0].value = accessToken;
+  // Persist token to .auth/user.json
+  const userJson = JSON.parse(fs.readFileSync(AUTH_FILE, 'utf-8'));
+  const originBlock = userJson.origins?.[0];
+  if (!originBlock) throw new Error('Invalid .auth/user.json structure.');
 
-  // Persist the updated user data back to the auth file
-  fs.writeFileSync(authFile, JSON.stringify(user, null, 2));
+  const entry = originBlock.localStorage.find((x: any) => x.name === 'jwtToken');
+  if (entry) entry.value = token;
+  else originBlock.localStorage.push({ name: 'jwtToken', value: token });
+
+  fs.writeFileSync(AUTH_FILE, JSON.stringify(userJson, null, 2));
   console.log('✅ Token written to .auth/user.json');
 
-  // ------------------------------------------------------------
-  // 3️⃣ Expose token to runtime environment
-  // This allows other tests to use `process.env.ACCESS_TOKEN` for API calls
-  // without reading the JSON file again.
-  // ------------------------------------------------------------
-  process.env['ACCESS_TOKEN'] = accessToken;
+  process.env.ACCESS_TOKEN = token!;
   console.log('✅ Token stored in process.env.ACCESS_TOKEN for API usage');
 
-  // At this point:
-  // - UI tests can start with logged-in session (storageState)
-  // - API tests can read token from `process.env.ACCESS_TOKEN`
+  await ctx.dispose();
 });

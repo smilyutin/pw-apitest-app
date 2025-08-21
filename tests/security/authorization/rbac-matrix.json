@@ -1,0 +1,92 @@
+{
+  "notes": [
+    "Minimal RBAC expectations for the Conduit demo API used in tests.",
+    "viewer: anonymous user (no token)",
+    "user: authenticated regular user",
+    "owner: same as user but specifically the resource owner (article author)",
+    "admin: optional – if you don’t have a real admin, these entries should fail as 401/403 (or 404)."
+  ],
+  
+  "auth": {
+    "userCredsFile": ".secrets/creds.json",
+    "adminCredsFile": ".secrets/admin.creds.json"
+  },
+  "roles": ["viewer", "user", "owner", "admin"],
+  "resources": [
+    {
+      "name": "Health/Tags",
+      "endpoint": "/api/tags",
+      "methods": ["GET"],
+      "expect": {
+        "viewer": 200,
+        "user": 200,
+        "owner": 200,
+        "admin": 200
+      }
+    },
+    {
+      "name": "Current User",
+      "endpoint": "/api/user",
+      "methods": ["GET"],
+      "expect": {
+        "viewer": [401, 403],
+        "user": 200,
+        "owner": 200,
+        "admin": 200
+      }
+    },
+    {
+      "name": "Create Article",
+      "endpoint": "/api/articles",
+      "methods": ["POST"],
+      "payload": {
+        "article": {
+          "title": "RBAC seeded ${ts}",
+          "description": "rbac",
+          "body": "seed",
+          "tagList": []
+        }
+      },
+      "expect": {
+        "viewer": [401, 403],
+        "user": [200, 201],
+        "owner": [200, 201],
+        "admin": [200, 201]
+      }
+    },
+    {
+      "name": "Read Article (public)",
+      "endpointPattern": "/api/articles/${slug}",
+      "methods": ["GET"],
+      "expect": {
+        "viewer": 200,
+        "user": 200,
+        "owner": 200,
+        "admin": 200
+      }
+    },
+    {
+      "name": "Update Article (owner only)",
+      "endpointPattern": "/api/articles/${slug}",
+      "methods": ["PUT"],
+      "payload": { "article": { "description": "rbac update ${ts}" } },
+      "expect": {
+        "viewer": [401, 403],
+        "user": [401, 403, 404],
+        "owner": 200,
+        "admin": [401, 403, 404]
+      }
+    },
+    {
+      "name": "Delete Article (owner only)",
+      "endpointPattern": "/api/articles/${slug}",
+      "methods": ["DELETE"],
+      "expect": {
+        "viewer": [401, 403],
+        "user": [401, 403, 404],
+        "owner": 204,
+        "admin": [401, 403, 404]
+      }
+    }
+  ]
+}

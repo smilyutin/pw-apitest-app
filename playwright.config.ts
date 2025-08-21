@@ -38,7 +38,14 @@ export default defineConfig({
 
   projects: [
     // 🔹 Runs first in CLI
-    { name: 'setup', testMatch: 'auth.setup.ts' },
+    {
+  name: 'setup',
+  testMatch: 'auth.setup.ts',
+  use: {
+    storageState: { cookies: [], origins: [] },
+    extraHTTPHeaders: {}, // do not send Authorization on login/register
+  },
+},
 
     // 🔹 Creates article for like tests
     { name: 'articleSetup', testMatch: 'newArticle.setup.ts', dependencies: ['setup'], teardown: 'articleCleanUp' },
@@ -54,6 +61,9 @@ export default defineConfig({
 
     { name: 'likeCounterGlobal', testMatch: 'likesCounterGlobal.spec.ts', use: { ...devices['Desktop Chrome'], storageState: '.auth/user.json' }},
   
-    { name: 'security',   testMatch: 'tests/security/*.ts',   use: { ...devices['Desktop Chrome'] }},
-  ],
+{
+      name: 'security',
+      testMatch: ['tests/security/**/*.spec.ts'], // <-- recursive subfolders
+      use: { /*...*/ },
+    },  ],
 });
