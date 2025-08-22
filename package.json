@@ -2,9 +2,18 @@
   "devDependencies": {
     "@playwright/test": "^1.54.1",
     "@types/dotenv": "^6.1.1",
-    "@types/node": "^24.1.0"
+    "@types/node": "^24.1.0",
+    "audit-ci": "^7.1.0"
   },
   "dependencies": {
     "dotenv": "^17.2.1"
+  },
+  "scripts": {
+    "test:sec": "npx playwright test tests/security",
+    "audit": "npm audit --omit=dev --audit-level=high",
+    "audit:ci": "audit-ci --moderate || true",
+    "test:sec:soft": "SECURITY_SOFT=1 npx playwright test tests/security",
+    "test:headers": "npx playwright test tests/security/headers/security-headers.spec.ts",
+    "test:headers:soft": "SECURITY_SOFT=1 npx playwright test tests/security/headers/security-headers.spec.ts"
   }
 }
