@@ -1,3 +1,4 @@
+//Role scoping: endpoints enforce least privilege (e.g., viewer vs admin).
 import path from 'path';
 import fs from 'fs';
 

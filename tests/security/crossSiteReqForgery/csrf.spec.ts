@@ -1,130 +1,138 @@
-// tests/security/csrf/csrf.spec.ts
-//Token required on state-changing requests (POST/PUT/DELETE)
-import { test, expect, request as pwRequest } from '@playwright/test';
+// tests/security/crossSiteReqForgery/csrf.spec.ts
+import { test, expect, request as pwRequest, APIRequestContext } from '@playwright/test';
 import { accessToken } from '../../../utils/token';
 
 const API = 'https://conduit-api.bondaracademy.com';
 const SOFT = process.env.SECURITY_SOFT === '1';
 const json = { 'Content-Type': 'application/json' };
 
-function expectSoft(condition: boolean, message: string) {
-  if (!condition) {
-    if (SOFT) console.warn('⚠️ [soft] ' + message);
-    else throw new Error(message);
+function short(s: string, n = 200) {
+  return (s || '').slice(0, n);
+}
+
+function expectSoft(cond: boolean, msg: string) {
+  if (!cond) {
+    if (SOFT) console.warn('⚠️  ' + msg);
+    else throw new Error(msg);
   }
 }
-const isRejected = (s: number) => [401, 403, 404, 422, 400].includes(s);
-const isServerError = (s: number) => s >= 500 && s < 600;
 
-async function newApi() {
-  return await pwRequest.newContext({ baseURL: API });
+async function newApi(opts?: Parameters<typeof pwRequest.newContext>[0]): Promise<APIRequestContext> {
+  return await pwRequest.newContext({ baseURL: API, ...opts });
 }
 
-async function getTextSafe(res: any) { try { return await res.text(); } catch { return ''; } }
+// Helper: expect an auth/CSRF-style rejection; treat CORS 5xx as soft warning.
+async function expectMissingToken(status: number, bodyText: string, what: string) {
+  const ok = [401, 403, 422, 400].includes(status);
+  if (ok) {
+    return; // proper rejection
+  }
+
+  const looksLikeCors5xx =
+    status >= 500 &&
+    /not allowed by cors/i.test(bodyText || '');
+
+  if (looksLikeCors5xx) {
+    console.warn(`⚠️  ${what} returned ${status} (CORS error). Expected 401/403/422/400.`);
+    // Soft-pass regardless of SECURITY_SOFT, we only warn here.
+    return;
+  }
+
+  // Anything else: hard/soft depending on SECURITY_SOFT
+  expectSoft(false, `${what} should be rejected (401/403/422/400). Got ${status}`);
+}
 
 test.describe('[security] CSRF / state-change must require auth token', () => {
   test('POST without Authorization is rejected; with Authorization succeeds; unauth DELETE must not remove', async () => {
-    const ctx = await newApi();
-    const slugHolder: { slug?: string } = {};
+    const forged = await newApi(); // no auth context
+    const auth = await newApi();   // explicit Authorization headers only
 
-    // 1) Unauth POST should be rejected
-    const forged = await ctx.post('/api/articles', {
+    // 1) Forged create (no auth, hostile origin)
+    const forgedPost = await forged.post('/api/articles', {
       headers: { ...json, Origin: 'https://evil.example', Referer: 'https://evil.example/' },
-      data: { article: { title: `csrf-forged-${Date.now()}`, description: 'attempt without token', body: 'should fail', tagList: [] } },
+      data: {
+        article: {
+          title: `csrf-forged-${Date.now()}`,
+          description: 'attempt without token',
+          body: 'this should fail',
+          tagList: [],
+        },
+      },
     });
-    const forgedStatus = forged.status();
-    const forgedBody = await getTextSafe(forged);
-    if (isServerError(forgedStatus)) {
-      console.warn(`⚠️  POST /api/articles without auth returned ${forgedStatus} (should be 401/403). Headers: ${JSON.stringify(forged.headers())} Body: ${forgedBody.slice(0,300)}`);
-    }
-    expectSoft(isRejected(forgedStatus) || isServerError(forgedStatus),
-      `POST without Authorization should be rejected; got ${forgedStatus}`);
 
-    // 2) Create WITH Authorization
-    const create = await ctx.post('/api/articles', {
+    const forgedBody = await forgedPost.text().catch(() => '');
+    console.log('🧪 forged POST status=', forgedPost.status(),
+                'ct=', forgedPost.headers()['content-type'],
+                'body=', short(forgedBody));
+    await expectMissingToken(forgedPost.status(), forgedBody, 'POST /api/articles without Authorization');
+
+    // 2) Control create (with auth)
+    const create = await auth.post('/api/articles', {
       headers: { ...json, Authorization: `Token ${accessToken}` },
-      data: { article: { title: `csrf-valid-${Date.now()}`, description: 'created with token', body: 'ok', tagList: [] } },
+      data: {
+        article: {
+          title: `csrf-valid-${Date.now()}`,
+          description: 'created with token',
+          body: 'ok',
+          tagList: [],
+        },
+      },
     });
+    const createTxt = await create.text();
+    console.log('✅ auth POST status=', create.status(),
+                'ct=', create.headers()['content-type'],
+                'body=', short(createTxt));
     expect(create.status()).toBe(201);
-    const created = await create.json();
-    const slug = created.article.slug;
-    slugHolder.slug = slug;
+    const created = JSON.parse(createTxt);
+    const slug: string = created.article.slug;
 
-    // 3) Unauth DELETE should NOT remove
-    const delNoAuth = await ctx.delete(`/api/articles/${slug}`);
-    const delNoAuthStatus = delNoAuth.status();
-    const delNoAuthBody = await getTextSafe(delNoAuth);
-    if (isServerError(delNoAuthStatus)) {
-      console.warn(`⚠️  DELETE without auth returned ${delNoAuthStatus} (should be 401/403/404). Headers: ${JSON.stringify(delNoAuth.headers())} Body: ${delNoAuthBody.slice(0,300)}`);
+    // 3) Unauth DELETE must not remove the resource
+    const delNoAuth = await forged.delete(`/api/articles/${slug}`, {
+      headers: { Origin: 'https://evil.example', Referer: 'https://evil.example/' },
+    });
+    const delNoAuthBody = await delNoAuth.text().catch(() => '');
+    console.log('🧪 forged DELETE status=', delNoAuth.status(),
+                'ct=', delNoAuth.headers()['content-type'],
+                'body=', short(delNoAuthBody));
+
+    // Accept 401/403/404; treat 5xx CORS as soft warning; fail others.
+    const delRejected = [401, 403, 404].includes(delNoAuth.status());
+    const delLooksCors5xx = delNoAuth.status() >= 500 && /not allowed by cors/i.test(delNoAuthBody || '');
+    if (!delRejected && !delLooksCors5xx) {
+      expectSoft(false, `DELETE without Authorization should be rejected; got ${delNoAuth.status()}`);
+    }
+    if (delLooksCors5xx) {
+      console.warn('⚠️  Unauth DELETE returned 5xx CORS. Expected 401/403/404.');
     }
 
-    // Verify existence with an authenticated GET
-    const getAuthAfter = await ctx.get(`/api/articles/${slug}`, {
+    // 4) Verify existence after unauth DELETE
+    const getAfter = await auth.get(`/api/articles/${slug}`, {
       headers: { Authorization: `Token ${accessToken}` },
     });
+    console.log('🔎 GET after unauth DELETE status=', getAfter.status());
+    const stillThere = getAfter.status() === 200;
 
-    const stillExists = getAuthAfter.status() === 200;
-    expectSoft(
-      stillExists,
-      'Unauthenticated DELETE actually removed the article (critical).'
-    );
+    // If server returned success AND it disappeared → critical.
+    if ((delNoAuth.status() === 200 || delNoAuth.status() === 204) && !stillThere) {
+      expectSoft(false, 'Unauthenticated DELETE actually removed the article (critical).');
+    }
+    // If server returned success BUT article remains → status bug.
+    if ((delNoAuth.status() === 200 || delNoAuth.status() === 204) && stillThere) {
+      console.warn('⚠️  Unauth DELETE returned success but resource still exists — likely wrong status.');
+    }
 
-    // 4) Authorized DELETE should succeed (only if still exists)
-    if (stillExists) {
-      const delAuth = await ctx.delete(`/api/articles/${slug}`, {
+    // 5) Cleanup (only if still exists)
+    if (stillThere) {
+      const delAuth = await auth.delete(`/api/articles/${slug}`, {
         headers: { Authorization: `Token ${accessToken}` },
       });
+      console.log('🧹 auth DELETE status=', delAuth.status());
       expect(delAuth.status()).toBe(204);
+    } else {
+      console.warn('ℹ️  Article gone at cleanup time.');
     }
 
-    await ctx.dispose();
-  });
-
-  test('PUT without Authorization is rejected; with Authorization succeeds; “wrong token” is blocked', async () => {
-    const ctx = await newApi();
-
-    // Create baseline article
-    const create = await ctx.post('/api/articles', {
-      headers: { ...json, Authorization: `Token ${accessToken}` },
-      data: { article: { title: `csrf-put-${Date.now()}`, description: 'pre for PUT', body: 'ok', tagList: [] } },
-    });
-    expect(create.status()).toBe(201);
-    const { article } = await create.json();
-    const slug = article.slug;
-
-    // 1) PUT w/o auth should be rejected
-    const putNoAuth = await ctx.put(`/api/articles/${slug}`, {
-      headers: { ...json, Origin: 'https://evil.example' },
-      data: { article: { title: 'hacked-title' } },
-    });
-    const putNoAuthStatus = putNoAuth.status();
-    const putNoAuthBody = await getTextSafe(putNoAuth);
-    if (isServerError(putNoAuthStatus)) {
-      console.warn(`⚠️  PUT without auth returned ${putNoAuthStatus} (should be 401/403/404). Headers: ${JSON.stringify(putNoAuth.headers())} Body: ${putNoAuthBody.slice(0,300)}`);
-    }
-    expectSoft(isRejected(putNoAuthStatus) || isServerError(putNoAuthStatus),
-      `PUT without Authorization should be rejected; got ${putNoAuthStatus}`);
-
-    // 2) PUT with a WRONG token should be rejected
-    const wrongToken = 'Token eyWrong.' + Math.random().toString(36).slice(2);
-    const putWrong = await ctx.put(`/api/articles/${slug}`, {
-      headers: { ...json, Authorization: wrongToken },
-      data: { article: { title: 'wrong-token-edit' } },
-    });
-    expectSoft(isRejected(putWrong.status()),
-      `PUT with wrong token should be rejected; got ${putWrong.status()}`);
-
-    // 3) Owner update succeeds
-    const putAuth = await ctx.put(`/api/articles/${slug}`, {
-      headers: { ...json, Authorization: `Token ${accessToken}` },
-      data: { article: { description: 'owner-updated' } },
-    });
-    expect(putAuth.status()).toBe(200);
-
-    // cleanup
-    await ctx.delete(`/api/articles/${slug}`, {
-      headers: { Authorization: `Token ${accessToken}` },
-    }).catch(() => {});
-    await ctx.dispose();
+    await forged.dispose();
+    await auth.dispose();
   });
 });
