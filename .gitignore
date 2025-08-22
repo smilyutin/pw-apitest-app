@@ -6,9 +6,7 @@ node_modules/
 /playwright/.caches/
 .last-run.json
 error-context.md
-.secrets/
 .admin.creds.json
-.creds.json
 .user.creds.json
 .auth/
 .user.json
