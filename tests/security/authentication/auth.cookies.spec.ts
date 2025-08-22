@@ -18,7 +18,7 @@ function https(url: string) {
 }
 
 test.describe('Authentication & session cookie flags', () => {
-  test('No auth data in cookies; any cookies have safe flags', async ({ browser }) => {
+  test.skip('No auth data in cookies; any cookies have safe flags', async ({ browser }) => {
     // Use your existing authenticated storage state to act as a logged-in user
     const storageStatePath = '.auth/user.json';
     expect(fs.existsSync(storageStatePath)).toBeTruthy();

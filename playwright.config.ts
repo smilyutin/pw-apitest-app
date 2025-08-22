@@ -61,9 +61,20 @@ export default defineConfig({
 
     { name: 'likeCounterGlobal', testMatch: 'likesCounterGlobal.spec.ts', use: { ...devices['Desktop Chrome'], storageState: '.auth/user.json' }},
   
+  {
+    name: 'security',
+    testMatch: 'tests/security/**/*.ts',
+    use: { /* ... */ },
+  },  
+  {
+  name: 'headers',
+  testMatch: 'tests/security/headers/*.ts',
+  use: { /* ...devices['Desktop Chrome'] */ },
+},
 {
-      name: 'security',
-      testMatch: ['tests/security/**/*.spec.ts'], // <-- recursive subfolders
-      use: { /*...*/ },
-    },  ],
+  name: 'input',
+  testMatch: 'tests/security/input/*.ts',
+  use: { /* ...devices['Desktop Chrome'] */ },
+},
+],
 });

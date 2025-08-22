@@ -1,0 +1,83 @@
+name: Security Checks
+
+on:
+  pull_request:
+    branches: [ main, master ]
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  security-soft:
+    name: Security (soft) – PR
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        node: [20]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: Clean previous Playwright artifacts
+        run: rm -rf playwright-report test-results || true
+
+      - name: Install deps (clean)
+        run: npm ci --legacy-peer-deps
+
+      # If your tests use env secrets, add them here via env: PW_EMAIL/PW_PASSWORD, etc.
+      - name: Run security suite (soft mode)
+        env:
+          SECURITY_SOFT: '1'                       # soft warnings on PRs
+          UI_ORIGIN: 'https://conduit.bondaracademy.com'
+        run: npx playwright test tests/security --reporter=html,line
+
+      - name: Upload Playwright report (soft)
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-security-soft-node-${{ matrix.node }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: playwright-report/
+
+  security-strict:
+    name: Security (strict) – main/master
+    if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        node: [20]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: Clean previous Playwright artifacts
+        run: rm -rf playwright-report test-results || true
+
+      - name: Install deps (clean)
+        run: npm ci --legacy-peer-deps
+
+      - name: Run security suite (strict mode)
+        env:
+          UI_ORIGIN: 'https://conduit.bondaracademy.com'
+        run: npx playwright test tests/security --reporter=html,line
+
+      - name: Upload Playwright report (strict)
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-security-strict-node-${{ matrix.node }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: playwright-report/
