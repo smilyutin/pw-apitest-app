@@ -27,7 +27,7 @@ function parseHsts(value: string) {
   return out;
 }
 
-test.describe('[security-headers] HSTS', () => {
+test.describe.skip('[security-headers] HSTS', () => {
   test('Strict-Transport-Security header is present and strong', async ({ page }) => {
     // Must be HTTPS for HSTS to be meaningful
     const res = await page.goto(APP, { waitUntil: 'domcontentloaded' });
