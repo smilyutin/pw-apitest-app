@@ -6,6 +6,10 @@ node_modules/
 /playwright/.caches/
 .last-run.json
 error-context.md
+.secrets/
+.admin.creds.json
+.creds.json
+.user.creds.json
 .auth/
 .user.json
 .article.json
@@ -14,7 +18,6 @@ error-context.md
 dist/
 build/
 coverage/
-
 # environment files
 .env
 .env.*.local
@@ -28,9 +31,6 @@ Thumbs.db
 # IDE/editor settings
 .vscode/
 .idea/
-# Python caches (if any)
-__pycache__/
-*.py[cod]
 # TypeScript cache
 *.tsbuildinfo
 # misc
