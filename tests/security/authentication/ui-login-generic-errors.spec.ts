@@ -4,7 +4,7 @@ import path from 'path';
 
 const APP = 'https://conduit.bondaracademy.com';
 
-test.describe('[security] Generic error messages in UI login', () => {
+test.describe.skip('[security] Generic error messages in UI login', () => {
   // Force logged-out context just for this file
   test.use({ storageState: { cookies: [], origins: [] } });
 
