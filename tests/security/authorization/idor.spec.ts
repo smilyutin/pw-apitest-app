@@ -89,16 +89,16 @@ test.describe('[security] IDOR protection', () => {
 
       const created = await mustJson(create, 'createArticle(A)');
       slug = created.article.slug as string;
-      console.log(`✅ Article created: slug=${slug}`);
+      console.log(` Article created: slug=${slug}`);
 
       // --- 3) GET is public (should succeed without being owner)
-      console.log('🔹 User B GET article');
+      console.log(' User B GET article');
       const getAsB = await ctx.get(`/api/articles/${slug}`, { headers: authB });
       console.log(`   ↳ status ${getAsB.status()}`);
       expect(getAsB.status(), 'GET is public; should not require ownership').toBe(200);
 
       // --- 4) UPDATE must be forbidden for non-owner
-      console.log('🔹 User B attempting PUT (update)');
+      console.log(' User B attempting PUT (update)');
       const putAsB = await ctx.put(`/api/articles/${slug}`, {
         headers: { ...jsonHeaders, ...authB },
         data: { article: { title: 'Hacked by B' } },
@@ -119,7 +119,7 @@ test.describe('[security] IDOR protection', () => {
       }
 
       // --- 6) Owner can update/delete
-      console.log('🔹 User A updating own article');
+      console.log(' User A updating own article');
       const putAsA = await ctx.put(`/api/articles/${slug}`, {
         headers: { ...jsonHeaders, ...authA },
         data: { article: { description: 'owner updated' } },
@@ -127,14 +127,14 @@ test.describe('[security] IDOR protection', () => {
       console.log(`   ↳ status ${putAsA.status()}`);
       expect(putAsA.status()).toBe(200);
 
-      console.log('🔹 User A deleting own article');
+      console.log(' User A deleting own article');
       const delAsA = await ctx.delete(`/api/articles/${slug}`, { headers: authA });
       console.log(`   ↳ status ${delAsA.status()}`);
       expect(delAsA.status()).toBe(204);
     } finally {
       // Best-effort cleanup if the article still exists
       if (slug) {
-        console.log('🧹 Cleanup: delete article as User A (best-effort)');
+        console.log(' Cleanup: delete article as User A (best-effort)');
         await ctx.delete(`/api/articles/${slug}`, { headers: authA }).catch(() => {});
       }
       await ctx.dispose();

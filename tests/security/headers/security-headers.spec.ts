@@ -10,7 +10,7 @@ const SOFT = process.env.SECURITY_SOFT === '1'; // set to "1" to warn instead of
 
 const expectSoft = (ok: boolean, msg: string) => {
   if (!ok) {
-    if (SOFT) console.warn('⚠️ [soft] ' + msg);
+    if (SOFT) console.warn('[soft] ' + msg);
     else throw new Error(msg);
   }
 };
@@ -160,7 +160,7 @@ test.describe.skip('[security-headers] UI responses', () => {
     );
     expectSoft(includeSubs, `HSTS missing "includeSubDomains": "${hsts}".`);
     if (!preload) {
-      console.warn('⚠️ [soft] HSTS missing "preload" (optional, needed for Chromium preload list).');
+      console.warn('[soft] HSTS missing "preload" (optional, needed for Chromium preload list).');
     }
   });
 });

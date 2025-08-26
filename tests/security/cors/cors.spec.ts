@@ -14,7 +14,7 @@ const BAD_ORIGIN = 'https://evil.example';
 const SOFT = process.env.SECURITY_SOFT === '1';
 const expectSoft = (cond: boolean, msg: string) => {
   if (!cond) {
-    if (SOFT) console.warn('⚠️ [soft] ' + msg);
+    if (SOFT) console.warn(' [soft] ' + msg);
     else throw new Error(msg);
   }
 };

@@ -6,22 +6,22 @@ const slugFile = '.auth/article.json';
 const userFile = '.auth/user.json';
 
 teardown('delete article', async ({ request }) => {
-  // 1️⃣ Load slug
-  if (!fs.existsSync(slugFile)) throw new Error('❌ slugFile not found.');
+  // 1 Load slug
+  if (!fs.existsSync(slugFile)) throw new Error(' slugFile not found.');
   const { slugId } = JSON.parse(fs.readFileSync(slugFile, 'utf-8'));
 
-  // 2️⃣ Load JWT token from user.json
+  // 2 Load JWT token from user.json
   const userData = JSON.parse(fs.readFileSync(userFile, 'utf-8'));
   const token = userData?.origins?.[0]?.localStorage?.find(
     (item: any) => item.name === 'jwtToken'
   )?.value;
 
-  if (!token) throw new Error('❌ Token not found in .auth/user.json');
+  if (!token) throw new Error(' Token not found in .auth/user.json');
 
-  console.log(`🗑️ Attempting to delete article: ${slugId}`);
-  console.log('🔥 articleCleanUp started!');
+  console.log(` Attempting to delete article: ${slugId}`);
+  console.log(' articleCleanUp started!');
 
-  // 3️⃣ DELETE request
+  // 3 DELETE request
   const deleteResponse = await request.delete(
     `https://conduit-api.bondaracademy.com/api/articles/${slugId}`,
     {
@@ -34,10 +34,10 @@ teardown('delete article', async ({ request }) => {
   console.log('Delete status:', status);
   console.log('Delete body:', body);
 
-  // 4️⃣ Verify deletion
+  // 4 Verify deletion
   expect(status).toBe(204);
 
-  // 5️⃣ Cleanup slug file
+  // 5 Cleanup slug file
   fs.unlinkSync(slugFile);
   console.log('🧹 Slug file deleted after cleanup.');
 });

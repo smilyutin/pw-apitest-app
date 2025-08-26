@@ -62,7 +62,7 @@ test.describe.skip('[security-headers] HSTS', () => {
 
     // 3) preload optional but recommended if you plan to preload
     if (!preload) {
-      console.warn('⚠️ [soft] HSTS missing "preload". Add if you intend to submit to preload list.');
+      console.warn(' [soft] HSTS missing "preload". Add if you intend to submit to preload list.');
     }
   });
 });

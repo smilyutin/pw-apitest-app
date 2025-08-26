@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test';
 
 const UI = process.env.UI_ORIGIN ?? 'https://conduit.bondaracademy.com';
 
-// ✅ your approved script origins (adjust to your app)
 const ALLOWLIST = new Set([
   new URL(UI).origin,               // first-party
   // 'https://cdn.jsdelivr.net',

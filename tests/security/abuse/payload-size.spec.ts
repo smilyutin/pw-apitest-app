@@ -8,7 +8,7 @@ const BIG_MB = Number(process.env.BIG_MB || 5);  // ~5MB JSON field by default
 
 const expectSoft = (cond: boolean, msg: string) => {
   if (!cond) {
-    if (SOFT) console.warn('⚠️ [soft] ' + msg);
+    if (SOFT) console.warn(' [soft] ' + msg);
     else throw new Error(msg);
   }
 };

@@ -11,7 +11,7 @@ const json = { 'Content-Type': 'application/json' };
 
 function expectSoft(cond: boolean, msg: string) {
   if (!cond) {
-    if (SOFT) console.warn('⚠️ [soft] ' + msg);
+    if (SOFT) console.warn('[soft] ' + msg);
     else throw new Error(msg);
   }
 }

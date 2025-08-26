@@ -76,7 +76,7 @@ async function register(ctx: APIRequestContext, email: string, password: string,
     headers,
     data: { user: { email, password, username } },
   });
-  console.log(`📝 register status=${res.status()}`);
+  console.log(` register status=${res.status()}`);
   // API may return 422 if user exists—treat as OK for idempotency
   if (![200, 201, 422].includes(res.status())) {
     const preview = await bodyPreview(res);
@@ -86,7 +86,7 @@ async function register(ctx: APIRequestContext, email: string, password: string,
 
 setup('authentication', async () => {
   const { email, password } = getCreds('user'); // or 'admin' if you prefer
-  console.log(`👤 Using credentials for ${email}`);
+  console.log(` Using credentials for ${email}`);
 
   ensureAuthFileSkeleton();
 
@@ -98,7 +98,7 @@ setup('authentication', async () => {
     const lr = await login(ctx, email, password);
     token = lr?.user?.token;
   } catch (e) {
-    console.warn('⚠️ Login failed, will try register -> login. Details:\n' + (e as Error).message);
+    console.warn(' Login failed, will try register -> login. Details:\n' + (e as Error).message);
   }
 
   if (!token) {
@@ -109,7 +109,7 @@ setup('authentication', async () => {
   }
 
   expect(token, 'No token returned from login').toBeTruthy();
-  console.log('🔹 Access token successfully retrieved from API login');
+  console.log(' Access token successfully retrieved from API login');
 
   // Persist token to .auth/user.json
   const userJson = JSON.parse(fs.readFileSync(AUTH_FILE, 'utf-8'));
@@ -121,10 +121,10 @@ setup('authentication', async () => {
   else originBlock.localStorage.push({ name: 'jwtToken', value: token });
 
   fs.writeFileSync(AUTH_FILE, JSON.stringify(userJson, null, 2));
-  console.log('✅ Token written to .auth/user.json');
+  console.log(' Token written to .auth/user.json');
 
   process.env.ACCESS_TOKEN = token!;
-  console.log('✅ Token stored in process.env.ACCESS_TOKEN for API usage');
+  console.log(' Token stored in process.env.ACCESS_TOKEN for API usage');
 
   await ctx.dispose();
 });

@@ -4,7 +4,7 @@ import { accessToken } from '../../../utils/token';
 
 const BASE_URL = 'https://conduit-api.bondaracademy.com';
 
-// 1️⃣ Invalid login attempt
+// 1 Invalid login attempt
 test('Invalid login should return 403 or 422', async () => {
   const context = await request.newContext();
   const response = await context.post(`${BASE_URL}/api/users/login`, {
@@ -20,7 +20,7 @@ test('Invalid login should return 403 or 422', async () => {
   expect([401, 403, 422]).toContain(response.status());
 });
 
-// 2️⃣ Expired or invalid token test
+// 2 Expired or invalid token test
 test('Access with invalid token should be denied', async () => {
   const context = await request.newContext();
   const response = await context.get(`${BASE_URL}/api/user`, {
@@ -32,7 +32,7 @@ test('Access with invalid token should be denied', async () => {
   expect([401, 403]).toContain(response.status());
 });
 
-// 3️⃣ Unauthorized Access (BOLA)
+// 3 Unauthorized Access (BOLA)
 test('Should not allow access to another user’s article', async ({ request }) => {
   const response = await request.get(`${BASE_URL}/api/articles/some-other-users-article`, {
     headers: { Authorization: `Token ${accessToken}` },
@@ -41,7 +41,7 @@ test('Should not allow access to another user’s article', async ({ request }) 
   expect([401, 403, 404]).toContain(response.status());
 });
 
-// 4️⃣ Mass Assignment Check
+// 4 Mass Assignment Check
 test('Should ignore unauthorized fields in registration', async ({ request }) => {
   const response = await request.post(`${BASE_URL}/api/users`, {
     data: {
@@ -49,7 +49,7 @@ test('Should ignore unauthorized fields in registration', async ({ request }) =>
         username: 'testuser_' + Date.now(),
         email: `testuser_${Date.now()}@example.com`,
         password: 'password123',
-        role: 'admin', // 🚨 attempting privilege escalation
+        role: 'admin', //  attempting privilege escalation
       },
     },
     headers: { 'Content-Type': 'application/json' },
@@ -62,16 +62,16 @@ test('Should ignore unauthorized fields in registration', async ({ request }) =>
   }
 });
 
-// 5️⃣ Security Headers Validation
+// 5 Security Headers Validation
 test('Should contain essential security headers', async ({ request }) => {
   const response = await request.get(`${BASE_URL}/api/user`, {
     headers: { Authorization: `Token ${accessToken}` },
   });
 
   const headers = response.headers();
-  console.log('🔍 Headers received:', headers);
+  console.log(' Headers received:', headers);
   if (!headers['x-content-type-options']) {
-  console.warn('⚠️ Missing x-content-type-options header!');
+  console.warn(' Missing x-content-type-options header!');
 } else {
   expect(headers['x-content-type-options']).toBe('nosniff');
 }
@@ -85,7 +85,7 @@ test('Should contain essential security headers', async ({ request }) => {
   }
 });
 
-// 6️⃣ Security Fuzzing Tests
+// 6 Security Fuzzing Tests
 test.describe('Security Fuzzing with Malicious Input', () => {
   const fuzzPayloads = [
     "<script>alert(1)</script>",
