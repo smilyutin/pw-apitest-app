@@ -1,0 +1,20 @@
+{
+  // Point VSCode to the exact Playwright config
+  "playwright.configPath": "playwright.config.ts",
+
+  // Enable the Playwright Test Explorer in the Testing tab
+  "playwright.testExplorerEnabled": true,
+
+  // Show test run icons (▶) in the editor
+  "testing.automaticallyOpenPeekView": "never",
+  "testing.showInlineError": true,
+
+  // Optional: automatically discover tests on startup
+  "playwright.testExplorer": {
+    "enabled": true,
+    "showTestExplorer": true
+  },
+
+  // Optional: clear any previous cache to force rediscovery
+  "playwright.testExplorer.experimental.runMode": "inTerminal"
+}

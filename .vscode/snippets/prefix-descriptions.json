@@ -1,0 +1,48 @@
+{
+  "pwimp": "Import Playwright test + expect",
+  "cl": "Log output to the console",
+  "pwd": "Generate a Playwright describe block",
+  "pwt": "Generate a Playwright test",
+  "pwtt": "Playwright test with tag metadata",
+  "pwts": "Playwright step with nested actions",
+  "exv": "Expect locator to be visible",
+  "exe": "Expect value equality",
+  "ext": "Expect locator to have text",
+  "pom": "Page Object Model class template",
+  "ge": "Getter for POM class",
+
+  "pwretry": "Small retry loop helper",
+  "pwattach": "Attach screenshot on failure in afterEach",
+  "pwni": "Wait until the network is idle",
+  "pwstate": "Use a saved storage state file",
+  "pwloginapi": "Authenticate via API and prime localStorage with token",
+  "pwblock3p": "Dynamically block external JS (simulated CSP allowlist)",
+
+  "sec.const": "Common constants for security tests",
+  "sec.expectSoft": "Soft assertion that warns in CI soft mode",
+  "sec.api": "Create an isolated APIRequestContext",
+  "sec.token": "Pull token from Playwright storageState file",
+  "sec.cleanContext": "Force a clean, unauthenticated context for a test file",
+
+  "sec.auth.cookies": "Check cookie security attributes",
+  "sec.auth.logout": "Verify logout clears client state",
+
+  "sec.idor": "Classic IDOR negative checks",
+  "sec.rbac": "Role-based access control skeleton (supply tokens)",
+
+  "sec.csrf": "CSRF positive/negative pair",
+  "pwcsrf": "Quick CSRF reject/allow check",
+  "sec.xss.stored": "Stored XSS smoke",
+  "pwxsslint": "Detect inline <script> blocks in rendered HTML",
+  "sec.cors": "CORS preflight negative",
+
+  "sec.headers.csp": "Quick CSP presence check",
+  "pwcsp": "Minimal CSP presence + sanity checks",
+  "sec.ratelimit": "Simple throttling probe loop",
+  "sec.payload": "Large body rejection check",
+
+  "http.post.article": "REST Client request block for fast manual checks",
+
+  "pw.config.webserver": "Quick webServer block for local UI tests",
+  "ci.sec.soft": "Soft-mode security workflow block"
+}

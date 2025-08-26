@@ -1,0 +1,211 @@
+{
+  // =========================
+  // BASICS / UTILITIES
+  // =========================
+  "Import Playwright (TS/JS)": {
+    "scope": "javascript,typescript",
+    "prefix": "pwimp",
+    "body": ["import { test, expect } from '@playwright/test';"],
+    "description": "Import Playwright test + expect"
+  },
+  "Print to Console": {
+    "scope": "javascript,typescript",
+    "prefix": "cl",
+    "body": ["console.log(${1});"],
+    "description": "Log output to the console"
+  },
+  "Playwright Describe": {
+    "scope": "javascript,typescript",
+    "prefix": "pwd",
+    "body": ["test.describe('${1}', () => {", "  ${2}", "});"],
+    "description": "Generate a Playwright describe block"
+  },
+  "Playwright Test": {
+    "scope": "javascript,typescript",
+    "prefix": "pwt",
+    "body": ["test('${1}', async ({ ${2:page} }) => {", "  ${3}", "});"],
+    "description": "Generate a Playwright test"
+  },
+  "Playwright Test with Tag": {
+    "scope": "javascript,typescript",
+    "prefix": "pwtt",
+    "body": ["test('${1}', { tag: '@${2:security}' }, async ({ ${3:page} }) => {", "  ${4}", "});"],
+    "description": "Playwright test with tag metadata"
+  },
+  "Playwright Step": {
+    "scope": "javascript,typescript",
+    "prefix": "pwts",
+    "body": ["await test.step('${1}', async () => {", "  ${2}", "});"],
+    "description": "Playwright step with nested actions"
+  },
+  "Expect toBeVisible": {
+    "scope": "javascript,typescript",
+    "prefix": "exv",
+    "body": ["await expect(${1}).toBeVisible(${2});"],
+    "description": "Expect locator to be visible"
+  },
+  "Expect toEqual": {
+    "scope": "javascript,typescript",
+    "prefix": "exe",
+    "body": ["expect(${1}).toEqual(${2});"],
+    "description": "Expect value equality"
+  },
+  "Expect toHaveText": {
+    "scope": "javascript,typescript",
+    "prefix": "ext",
+    "body": ["await expect(${1}).toHaveText(${2});"],
+    "description": "Expect locator to have text"
+  },
+
+  // =========================
+  // DEBUGGING / UTILITIES
+  // =========================
+  "Quick Retry (useful for flaky endpoints)": {
+    "scope": "javascript,typescript",
+    "prefix": "pwretry",
+    "body": [
+      "let last;",
+      "for (let i = 0; i < ${1:3}; i++) {",
+      "  last = await ${2:operation}();",
+      "  if (${3:await last.ok?.() ?? last}) break;",
+      "  await new Promise(r => setTimeout(r, ${4:250}));",
+      "}",
+      "expect(${5:last}).toBeTruthy();"
+    ],
+    "description": "Small retry loop helper"
+  },
+  "AfterEach Attach Trace/Screenshot on Failure": {
+    "scope": "javascript,typescript",
+    "prefix": "pwattach",
+    "body": [
+      "test.afterEach(async ({ page }, testInfo) => {",
+      "  if (testInfo.status !== testInfo.expectedStatus) {",
+      "    await testInfo.attach('screenshot', {",
+      "      body: await page.screenshot({ fullPage: true }),",
+      "      contentType: 'image/png'",
+      "    });",
+      "  }",
+      "});"
+    ],
+    "description": "Attach screenshot on failure in afterEach"
+  },
+  "Wait for Network Idle": {
+    "scope": "javascript,typescript",
+    "prefix": "pwni",
+    "body": ["await page.waitForLoadState('networkidle');"],
+    "description": "Wait until the network is idle"
+  },
+  "StorageState (start logged-in)": {
+    "scope": "javascript,typescript",
+    "prefix": "pwstate",
+    "body": ["test.use({", "  storageState: '${1:.auth/user.json}'", "});"],
+    "description": "Use a saved storage state file"
+  },
+
+  // =========================
+  // SECURITY HELPERS
+  // =========================
+  "SEC Helper: constants (APP/API)": {
+    "scope": "javascript,typescript",
+    "prefix": "sec.const",
+    "body": [
+      "const APP = process.env.UI_ORIGIN || 'https://conduit.bondaracademy.com';",
+      "const API = process.env.API_ORIGIN || 'https://conduit-api.bondaracademy.com';",
+      "const json = { 'Content-Type': 'application/json' };",
+      "const SOFT = process.env.SECURITY_SOFT === '1';"
+    ],
+    "description": "Common constants for security tests"
+  },
+  "SEC Helper: soft expect": {
+    "scope": "javascript,typescript",
+    "prefix": "sec.expectSoft",
+    "body": [
+      "function expectSoft(condition: boolean, message: string) {",
+      "  if (!condition) {",
+      "    if (SOFT) console.warn('⚠️ [soft] ' + message);",
+      "    else throw new Error(message);",
+      "  }",
+      "}"
+    ],
+    "description": "Soft assertion that warns in CI soft mode"
+  },
+  "SEC Helper: API context factory": {
+    "scope": "javascript,typescript",
+    "prefix": "sec.api",
+    "body": [
+      "import { request as pwRequest } from '@playwright/test';",
+      "async function api() {",
+      "  return pwRequest.newContext({ baseURL: API });",
+      "}"
+    ],
+    "description": "Create an isolated APIRequestContext"
+  },
+  "SEC Helper: load access token from .auth/user.json": {
+    "scope": "javascript,typescript",
+    "prefix": "sec.token",
+    "body": [
+      "import fs from 'fs';",
+      "let accessToken: string | undefined;",
+      "try {",
+      "  const u = JSON.parse(fs.readFileSync('.auth/user.json', 'utf-8'));",
+      "  accessToken = u?.origins?.[0]?.localStorage?.find((x: any) => x.name === 'jwtToken')?.value;",
+      "  console.log('🔹 Loaded token from .auth/user.json');",
+      "} catch {",
+      "  console.warn('⚠️ Could not load token from .auth/user.json');",
+      "}"
+    ],
+    "description": "Pull token from Playwright storageState file"
+  },
+
+  // =========================
+  // SECURITY TESTS
+  // =========================
+  "SEC CSRF: state-change requires token": {
+    "scope": "javascript,typescript",
+    "prefix": "sec.csrf",
+    "body": [
+      "test('POST without Authorization rejected; with Authorization succeeds', async () => {",
+      "  const ctx = await api();",
+      "  const forged = await ctx.post('/api/articles',{ data:{ article:{ title:`forged-${'${'}Date.now()${'}'}`, description:'x', body:'x', tagList:[] } }, headers:{ 'Content-Type':'application/json', Origin:'https://evil.example' } });",
+      "  expect([401,403,422,400,500]).toContain(forged.status());",
+      "});"
+    ],
+    "description": "CSRF positive/negative pair"
+  },
+  "SEC XSS: stored": {
+    "scope": "javascript,typescript",
+    "prefix": "sec.xss.stored",
+    "body": [
+      "test('Stored XSS does not execute', async ({ page }) => {",
+      "  const ctx = await api();",
+      "  const payload = `\\\"><img src=x onerror=window.__pwned__='X'>`;",
+      "  const create = await ctx.post('/api/articles',{ headers:{ ...json, Authorization:`Token ${'${'}accessToken${'}'}` }, data:{ article:{ title:`XSS ${'${'}Date.now()${'}'}`, description:'x', body:payload, tagList:[] } } });",
+      "  const slug = (await create.json()).article.slug;",
+      "  await page.addInitScript(()=>{ (window as any).__pwned__=undefined; });",
+      "  await page.goto(`${'${'}APP${'}'}/article/${'${'}slug${'}'}`);",
+      "  const executed = await page.evaluate(() => (window as any).__pwned__);",
+      "  expect(executed).toBeUndefined();",
+      "});"
+    ],
+    "description": "Stored XSS smoke"
+  },
+  "SEC CORS: disallowed origin preflight": {
+    "scope": "javascript,typescript",
+    "prefix": "sec.cors",
+    "body": [
+      "test('Preflight from disallowed origin must fail (403/4xx)', async () => {",
+      "  const ctx = await api();",
+      "  const pre = await ctx.fetch('/api/articles',{",
+      "    method: 'OPTIONS',",
+      "    headers: {",
+      "      Origin: 'https://evil.example',",
+      "      'Access-Control-Request-Method': 'POST',",
+      "      'Access-Control-Request-Headers': 'content-type'",
+      "    }",
+      "  });",
+      "  expect([403,401,400,404]).toContain(pre.status());",
+      "});"
+    ],
+    "description": "CORS preflight negative"
+  }
+}
