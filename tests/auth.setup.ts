@@ -58,13 +58,13 @@ async function login(ctx: APIRequestContext, email: string, password: string) {
     const res = await ctx.post('/api/users/login', { data: payload, headers });
     console.log(`🔐 login status=${res.status()} (attempt ${attempt})`);
     if (res.ok()) return await res.json();
-
     const st = res.status();
     if (![429, 500, 502, 503].includes(st)) {
       // non-transient: surface details
       const preview = await bodyPreview(res);
       throw new Error(`Login failed (${st}). Headers=${JSON.stringify(res.headers(), null, 2)}\nBody:\n${preview}`);
     }
+    console.log(`🔐 login failed (${st}). Retrying...`);
     await new Promise((r) => setTimeout(r, 600 * attempt)); // small backoff
   }
   throw new Error('Login failed after retries (likely rate limit / transient issues).');
