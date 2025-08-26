@@ -2,10 +2,13 @@ name: Security Checks
 
 on:
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   security-soft:
@@ -13,17 +16,15 @@ jobs:
     if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    strategy:
-      matrix:
-        node: [20]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Use Node ${{ matrix.node }}
+      - name: Use Node 20
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 20
           cache: npm
 
       - name: Clean previous Playwright artifacts
@@ -32,36 +33,39 @@ jobs:
       - name: Install deps (clean)
         run: npm ci --legacy-peer-deps
 
-      # If your tests use env secrets, add them here via env: PW_EMAIL/PW_PASSWORD, etc.
-      - name: Run security suite (soft mode)
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run security suite (soft)
         env:
-          SECURITY_SOFT: '1'                       # soft warnings on PRs
-          UI_ORIGIN: 'https://conduit.bondaracademy.com'
+          UI_ORIGIN: https://conduit.bondaracademy.com
+          SECURITY_SOFT: '1'
         run: npx playwright test tests/security --reporter=html,line
 
       - name: Upload Playwright report (soft)
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-security-soft-node-${{ matrix.node }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: playwright-report/
+          name: playwright-report-security-soft-node-20-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
 
   security-strict:
     name: Security (strict) – main/master
     if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    strategy:
-      matrix:
-        node: [20]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Use Node ${{ matrix.node }}
+      - name: Use Node 20
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 20
           cache: npm
 
       - name: Clean previous Playwright artifacts
@@ -70,14 +74,21 @@ jobs:
       - name: Install deps (clean)
         run: npm ci --legacy-peer-deps
 
-      - name: Run security suite (strict mode)
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run security suite (strict)
         env:
-          UI_ORIGIN: 'https://conduit.bondaracademy.com'
+          UI_ORIGIN: https://conduit.bondaracademy.com
+          SECURITY_SOFT: '0'
         run: npx playwright test tests/security --reporter=html,line
 
       - name: Upload Playwright report (strict)
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-security-strict-node-${{ matrix.node }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: playwright-report/
+          name: playwright-report-security-strict-node-20-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 30
