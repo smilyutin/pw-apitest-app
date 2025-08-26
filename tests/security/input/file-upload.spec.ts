@@ -7,7 +7,7 @@ const SOFT = process.env.SECURITY_SOFT === '1';
 // Soft assertion helper
 function expectSoft(ok: boolean, msg: string) {
   if (!ok) {
-    if (SOFT) console.warn('⚠️ [soft] ' + msg);
+    if (SOFT) console.warn('[soft] ' + msg);
     else throw new Error(msg);
   }
 }
@@ -41,7 +41,7 @@ async function detectUploadEndpoint(ctx: APIRequestContext): Promise<string | nu
     // Accept anything that is not a plain 404/405 with empty body;
     // many APIs will respond 4xx (missing extra fields), which is fine—we just need the route to exist.
     if (![404].includes(res.status())) {
-      console.log(`🔍 Upload candidate "${path}" responded ${res.status()}`);
+      console.log(` Upload candidate "${path}" responded ${res.status()}`);
       return path;
     }
   }
@@ -172,7 +172,7 @@ test.describe('[security] File upload: content-type, extension & path traversal'
       url = m ? m[0] : null;
     }
 
-    console.log(`🔗 upload status=${status}; url=${url ?? '(none)'}`);
+    console.log(` upload status=${status}; url=${url ?? '(none)'}`);
 
     // If the API returns a URL, sanity-check it
     if (url) {

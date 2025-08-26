@@ -7,7 +7,7 @@ const APP = 'https://conduit.bondaracademy.com';
 const SOFT = process.env.SECURITY_SOFT === '1';
 function expectSoft(ok: boolean, msg: string) {
   if (!ok) {
-    if (SOFT) console.warn('⚠️ [soft] ' + msg);
+    if (SOFT) console.warn(' [soft] ' + msg);
     else throw new Error(msg);
   }
 }
@@ -61,7 +61,7 @@ test.describe.skip('[security-headers] Permissions-Policy', () => {
     // 2) Recommend disabling sensitive features unless required
     for (const f of SENSITIVE) {
       if (!directives.has(f)) {
-        console.warn(`⚠️ [soft] No "${f}" directive present. Consider "${f}=()" to disable.`);
+        console.warn(`[soft] No "${f}" directive present. Consider "${f}=()" to disable.`);
         continue;
       }
       const raw = directives.get(f)!;

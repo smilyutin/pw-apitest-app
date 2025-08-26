@@ -12,7 +12,7 @@ function short(s: string, n = 200) {
 
 function expectSoft(cond: boolean, msg: string) {
   if (!cond) {
-    if (SOFT) console.warn('⚠️  ' + msg);
+    if (SOFT) console.warn('Ai  ' + msg);
     else throw new Error(msg);
   }
 }
@@ -33,7 +33,7 @@ async function expectMissingToken(status: number, bodyText: string, what: string
     /not allowed by cors/i.test(bodyText || '');
 
   if (looksLikeCors5xx) {
-    console.warn(`⚠️  ${what} returned ${status} (CORS error). Expected 401/403/422/400.`);
+    console.warn(` ${what} returned ${status} (CORS error). Expected 401/403/422/400.`);
     // Soft-pass regardless of SECURITY_SOFT, we only warn here.
     return;
   }
@@ -61,7 +61,7 @@ test.describe('[security] CSRF / state-change must require auth token', () => {
     });
 
     const forgedBody = await forgedPost.text().catch(() => '');
-    console.log('🧪 forged POST status=', forgedPost.status(),
+    console.log(' forged POST status=', forgedPost.status(),
                 'ct=', forgedPost.headers()['content-type'],
                 'body=', short(forgedBody));
     await expectMissingToken(forgedPost.status(), forgedBody, 'POST /api/articles without Authorization');
@@ -79,7 +79,7 @@ test.describe('[security] CSRF / state-change must require auth token', () => {
       },
     });
     const createTxt = await create.text();
-    console.log('✅ auth POST status=', create.status(),
+    console.log('auth POST status=', create.status(),
                 'ct=', create.headers()['content-type'],
                 'body=', short(createTxt));
     expect(create.status()).toBe(201);
@@ -91,7 +91,7 @@ test.describe('[security] CSRF / state-change must require auth token', () => {
       headers: { Origin: 'https://evil.example', Referer: 'https://evil.example/' },
     });
     const delNoAuthBody = await delNoAuth.text().catch(() => '');
-    console.log('🧪 forged DELETE status=', delNoAuth.status(),
+    console.log(' forged DELETE status=', delNoAuth.status(),
                 'ct=', delNoAuth.headers()['content-type'],
                 'body=', short(delNoAuthBody));
 
@@ -102,14 +102,14 @@ test.describe('[security] CSRF / state-change must require auth token', () => {
       expectSoft(false, `DELETE without Authorization should be rejected; got ${delNoAuth.status()}`);
     }
     if (delLooksCors5xx) {
-      console.warn('⚠️  Unauth DELETE returned 5xx CORS. Expected 401/403/404.');
+      console.warn(' Unauth DELETE returned 5xx CORS. Expected 401/403/404.');
     }
 
     // 4) Verify existence after unauth DELETE
     const getAfter = await auth.get(`/api/articles/${slug}`, {
       headers: { Authorization: `Token ${accessToken}` },
     });
-    console.log('🔎 GET after unauth DELETE status=', getAfter.status());
+    console.log(' GET after unauth DELETE status=', getAfter.status());
     const stillThere = getAfter.status() === 200;
 
     // If server returned success AND it disappeared → critical.
@@ -118,7 +118,7 @@ test.describe('[security] CSRF / state-change must require auth token', () => {
     }
     // If server returned success BUT article remains → status bug.
     if ((delNoAuth.status() === 200 || delNoAuth.status() === 204) && stillThere) {
-      console.warn('⚠️  Unauth DELETE returned success but resource still exists — likely wrong status.');
+      console.warn('  Unauth DELETE returned success but resource still exists — likely wrong status.');
     }
 
     // 5) Cleanup (only if still exists)
@@ -129,7 +129,7 @@ test.describe('[security] CSRF / state-change must require auth token', () => {
       console.log('🧹 auth DELETE status=', delAuth.status());
       expect(delAuth.status()).toBe(204);
     } else {
-      console.warn('ℹ️  Article gone at cleanup time.');
+      console.warn(' Article gone at cleanup time.');
     }
 
     await forged.dispose();

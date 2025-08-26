@@ -15,7 +15,7 @@ const ROTATION_STRICT = process.env.CSRF_ROTATION_STRICT === '1';
 const rotationCheck = (cond: boolean, msg: string) => {
   if (cond) return;
   if (ROTATION_STRICT) throw new Error(msg);
-  console.warn('⚠️ [rotation-soft] ' + msg);
+  console.warn(' [rotation-soft] ' + msg);
 };
 
 async function newApi() {
@@ -23,7 +23,7 @@ async function newApi() {
 }
 
 async function register(ctx: any, email: string, password: string, username: string) {
-  console.log(`🔹 Registering ${email}`);
+  console.log(`Registering ${email}`);
   const res = await ctx.post('/api/users', {
     headers: json,
     data: { user: { email, password, username } },
@@ -31,10 +31,10 @@ async function register(ctx: any, email: string, password: string, username: str
   const status = res.status();
   const ct = res.headers()['content-type'] || '';
   const bodyText = await res.text().catch(() => '');
-  console.log(`   ↳ status=${status} ct=${ct}`);
+  console.log(`status=${status} ct=${ct}`);
   if (!/application\/json/i.test(ct)) {
     // Some backends return text/HTML on 422 (already exists) — don’t hard fail.
-    console.warn(`ℹ️ Non-JSON register response (status ${status}): ${bodyText.slice(0, 200)}`);
+    console.warn(` Non-JSON register response (status ${status}): ${bodyText.slice(0, 200)}`);
   }
   // 201 = created, 422 = already exists
   expect([201, 422]).toContain(status);
@@ -42,14 +42,14 @@ async function register(ctx: any, email: string, password: string, username: str
 }
 
 async function login(ctx: any, email: string, password: string) {
-  console.log(`🔹 Logging in ${email}`);
+  console.log(` Logging in ${email}`);
   const res = await ctx.post('/api/users/login', {
     headers: json,
     data: { user: { email, password } },
   });
   const status = res.status();
   const bodyText = await res.text().catch(() => '');
-  console.log(`   ↳ status=${status}`);
+  console.log(`status=${status}`);
   expect(status).toBe(200);
   try { return JSON.parse(bodyText); } catch {
     throw new Error(`Expected JSON from login; got: ${bodyText.slice(0, 300)}`);
@@ -71,13 +71,13 @@ test.describe('[security] CSRF token binding & rotation', () => {
     // User A login #1
     const a1 = await login(ctx, aEmail, pass);
     const tokenA1: string | undefined = a1?.user?.token;
-    console.log('🔑 A1 token:', tokenA1?.slice(0, 18));
+    console.log(' A1 token:', tokenA1?.slice(0, 18));
     expect(tokenA1, 'A1 token missing').toBeTruthy();
 
     // Simulate “rotation”: login again
     const a2 = await login(ctx, aEmail, pass);
     const tokenA2: string | undefined = a2?.user?.token;
-    console.log('🔑 A2 token:', tokenA2?.slice(0, 18));
+    console.log(' A2 token:', tokenA2?.slice(0, 18));
     expect(tokenA2, 'A2 token missing').toBeTruthy();
 
     // Rotation check (soft for JWT apps that may reissue identical tokens)
@@ -89,7 +89,7 @@ test.describe('[security] CSRF token binding & rotation', () => {
     // User B login
     const b = await login(ctx, bEmail, pass);
     const tokenB: string | undefined = b?.user?.token;
-    console.log('🔑 B token:', tokenB?.slice(0, 18));
+    console.log(' B token:', tokenB?.slice(0, 18));
     expect(tokenB, 'B token missing').toBeTruthy();
 
     // Binding: tokens for different users should differ (STRICT)
@@ -102,7 +102,7 @@ test.describe('[security] CSRF token binding & rotation', () => {
     expect(replay.status()).toBe(200);
     const replayJson = await replay.json().catch(() => ({}));
     const emailFromReplay = replayJson?.user?.email;
-    console.log('🔁 /api/user with A token returned user:', emailFromReplay);
+    console.log(' /api/user with A token returned user:', emailFromReplay);
     expect(emailFromReplay).toBe(aEmail);
 
     await ctx.dispose();

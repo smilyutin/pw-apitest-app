@@ -26,7 +26,7 @@ function expectMissingToken(status: number, what: string, bodyText?: string) {
   }
   const ok = isRejected(status, bodyText);
   if (!ok) {
-    console.warn(`⚠️  ${what} returned ${status}. Expected rejection (401/403/422/400${ALLOW_500 ? '/5xx' : ''}).`);
+    console.warn(`  ${what} returned ${status}. Expected rejection (401/403/422/400${ALLOW_500 ? '/5xx' : ''}).`);
   }
   expect(ok, `${what} should be rejected (401/403/422/400${ALLOW_500 ? '/5xx' : ''}). Got ${status}`).toBeTruthy();
 }
@@ -59,7 +59,7 @@ test.describe('[security] CSRF / Missing or invalid token → 403 (or reject)', 
     });
     const forgedCt = forgedCreate.headers()['content-type'] || '';
     const forgedBody = await forgedCreate.text().catch(() => '');
-    console.log('🧪 forged POST status=', forgedCreate.status(), 'ct=', forgedCt, 'body=', forgedBody.slice(0, 200));
+    console.log(' forged POST status=', forgedCreate.status(), 'ct=', forgedCt, 'body=', forgedBody.slice(0, 200));
     expectMissingToken(forgedCreate.status(), 'POST /api/articles without Authorization', forgedBody);
 
     // ── 2) Authorized create (control)
@@ -84,13 +84,13 @@ test.describe('[security] CSRF / Missing or invalid token → 403 (or reject)', 
       data: { article: { title: 'hacked-title' } },
     });
     const putNoAuthBody = await putNoAuth.text().catch(() => '');
-    console.log('🧪 forged PUT status=', putNoAuth.status(), 'body=', putNoAuthBody.slice(0, 200));
+    console.log(' forged PUT status=', putNoAuth.status(), 'body=', putNoAuthBody.slice(0, 200));
     expectMissingToken(putNoAuth.status(), `PUT /api/articles/${slug} without Authorization`, putNoAuthBody);
 
     // ── 4) DELETE without Authorization
     const delNoAuth = await ctx.delete(`/api/articles/${slug}`);
     const delNoAuthBody = await delNoAuth.text().catch(() => '');
-    console.log('🧪 forged DELETE status=', delNoAuth.status(), 'body=', delNoAuthBody.slice(0, 200));
+    console.log(' forged DELETE status=', delNoAuth.status(), 'body=', delNoAuthBody.slice(0, 200));
     expectMissingToken(delNoAuth.status(), `DELETE /api/articles/${slug} without Authorization`, delNoAuthBody);
 
     // ── 5) Invalid token also rejected
@@ -99,14 +99,14 @@ test.describe('[security] CSRF / Missing or invalid token → 403 (or reject)', 
       data: { article: { description: 'invalid token attempt' } },
     });
     const putInvalidBody = await putInvalid.text().catch(() => '');
-    console.log('🧪 invalid-token PUT status=', putInvalid.status(), 'body=', putInvalidBody.slice(0, 200));
+    console.log(' invalid-token PUT status=', putInvalid.status(), 'body=', putInvalidBody.slice(0, 200));
     expectMissingToken(putInvalid.status(), `PUT /api/articles/${slug} with invalid token`, putInvalidBody);
 
     // ── Cleanup legit article
     const delAuth = await ctx.delete(`/api/articles/${slug}`, {
       headers: { Authorization: `Token ${accessToken}` },
     });
-    console.log('🧹 cleanup authorized DELETE status=', delAuth.status());
+    console.log(' cleanup authorized DELETE status=', delAuth.status());
     expect(delAuth.status(), 'Authorized DELETE should succeed').toBe(204);
 
     await ctx.dispose();
@@ -117,16 +117,16 @@ test.describe('[security] CSRF / Missing or invalid token → 403 (or reject)', 
 
     const meNoAuth = await ctx.get('/api/user');
     const bodyNoAuth = await meNoAuth.text().catch(() => '');
-    console.log('🧪 GET /api/user no-auth status=', meNoAuth.status(), 'body=', bodyNoAuth.slice(0, 200));
+    console.log(' GET /api/user no-auth status=', meNoAuth.status(), 'body=', bodyNoAuth.slice(0, 200));
     expectMissingToken(meNoAuth.status(), 'GET /api/user without Authorization', bodyNoAuth);
 
     const meBad = await ctx.get('/api/user', { headers: { Authorization: 'Token totally.invalid.token' } });
     const bodyBad = await meBad.text().catch(() => '');
-    console.log('🧪 GET /api/user invalid-token status=', meBad.status(), 'body=', bodyBad.slice(0, 200));
+    console.log(' GET /api/user invalid-token status=', meBad.status(), 'body=', bodyBad.slice(0, 200));
     expectMissingToken(meBad.status(), 'GET /api/user with invalid token', bodyBad);
 
     const meGood = await ctx.get('/api/user', { headers: { Authorization: `Token ${accessToken}` } });
-    console.log('🧪 GET /api/user with valid token status=', meGood.status());
+    console.log(' GET /api/user with valid token status=', meGood.status());
     expect(meGood.status(), 'GET /api/user with valid token').toBe(200);
 
     await ctx.dispose();

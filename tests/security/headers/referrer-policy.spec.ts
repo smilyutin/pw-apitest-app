@@ -8,7 +8,7 @@ const APP = 'https://conduit.bondaracademy.com';
 const SOFT = process.env.SECURITY_SOFT === '1';
 function expectSoft(ok: boolean, msg: string) {
   if (!ok) {
-    if (SOFT) console.warn('⚠️ [soft] ' + msg);
+    if (SOFT) console.warn(' [soft] ' + msg);
     else throw new Error(msg);
   }
 }

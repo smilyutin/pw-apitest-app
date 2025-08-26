@@ -58,7 +58,7 @@ for (const loc of settingsLocators) {
 if (!wentToSettings) {
   // capture DOM & screenshot to understand why it's missing
   const html = await page.content();
-  console.warn('⚠️ Settings link not found. Header snippet:\n',
+  console.warn(' Settings link not found. Header snippet:\n',
     html.slice(html.indexOf('<nav'), html.indexOf('</nav>') + 6));
   await page.screenshot({ path: `${testInfo.outputDir}/missing-settings.png`, fullPage: true });
 
@@ -95,9 +95,9 @@ await expect(page).toHaveURL(/\/settings$/, { timeout: 15_000 });
       // Capture diagnostics then fall back to a manual logout
       await snap('logout-missing');
       const html = await page.content();
-      console.warn('⚠️ Logout control not found. Snippet:', html.slice(0, 1000));
+      console.warn(' Logout control not found. Snippet:', html.slice(0, 1000));
 
-      console.warn('↪️ Falling back to manual logout (remove token + reload).');
+      console.warn(' Falling back to manual logout (remove token + reload).');
       await page.evaluate(() => {
         localStorage.removeItem('jwtToken');
         sessionStorage.clear();

@@ -5,7 +5,7 @@ const SOFT = process.env.SECURITY_SOFT === '1';
 
 // soft assertion helper (let CI pass but still warn)
 const expectSoft = (cond: boolean, msg: string) =>
-  cond ? undefined : (SOFT ? console.warn('⚠️ [soft] ' + msg) : expect(cond, msg).toBe(true));
+  cond ? undefined : (SOFT ? console.warn(' [soft] ' + msg) : expect(cond, msg).toBe(true));
 
 test.describe.skip('[security] Clickjacking headers & behavior', () => {
   test('Response has X-Frame-Options or CSP frame-ancestors', async ({ page }) => {

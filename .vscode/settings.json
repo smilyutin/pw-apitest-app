@@ -12,9 +12,14 @@
   // Optional: automatically discover tests on startup
   "playwright.testExplorer": {
     "enabled": true,
-    "showTestExplorer": true
+    "showTestExplorer": true,
   },
 
   // Optional: clear any previous cache to force rediscovery
-  "playwright.testExplorer.experimental.runMode": "inTerminal"
+  "playwright.testExplorer.experimental.runMode": "inTerminal",
+
+  "editor.snippetSuggestions": "inline",
+  "editor.tabCompletion": "on",
+  "editor.quickSuggestions": { "other": true, "comments": true, "strings": true },
+  "editor.suggest.showSnippets": true,
 }
