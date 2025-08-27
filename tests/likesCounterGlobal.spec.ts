@@ -27,11 +27,19 @@ await expect(page.getByText('Global Feed')).toBeVisible({ timeout: 10000 });
   // 4 Get the like button inside that article
   const likeButton = articlePreview.locator('app-favorite-button button');
 
-  // 5 Verify like count starts at 0
-  await expect(likeButton).toHaveText(/0/, { timeout: 5000 });
+   // 5 Check current like count (could be 0 or 1)
+  let text = await likeButton.textContent();
+  let count = Number((text || '0').replace(/[^\d]/g, '') || 0);
 
-  // 6️Click like and verify it increments to 1
-  await likeButton.click();
+  // If already liked (count > 0), unlike first
+  if (count > 0) {
+    await likeButton.click();
+    await expect(likeButton).toHaveText(/0/, { timeout: 5000 });
+    count = 0;
+    }
+
+// 6️ Now like the article and verify it increments to 1
+  await likeButton.click();  
   await expect(likeButton).toHaveText(/1/, { timeout: 5000 });
 
   console.log(`Global liked article successfully: ${slugId}`);

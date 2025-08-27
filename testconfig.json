@@ -1,8 +1,11 @@
 {
   "compilerOptions": {
-    "moduleResolution": "node",
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Node",
     "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "types": ["node", "@playwright/test"]
+    "skipLibCheck": true,
+    "types": ["node"],
+    "lib": ["ES2020", "DOM"]
   }
 }

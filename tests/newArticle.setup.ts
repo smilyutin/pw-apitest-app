@@ -33,7 +33,7 @@ setup('create new article', async ({ request }) => {
 
   console.log('Article created:', slugId);
 
-  // 3️⃣ Save slug & author for teardown
+  // 3 Save slug & author for teardown
   const articleData = {
     slugId,
     author: response.article.author.username

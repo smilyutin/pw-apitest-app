@@ -1,11 +1,11 @@
-version: 2
-updates:
-  - package-ecosystem: npm
-    directory: "/"
-    schedule:
-      interval: weekly
-    open-pull-requests-limit: 10
-    labels: ["deps", "automated"]
-    ignore:
-      - dependency-name: "typescript"
-        versions: ["<5.0.0"]  # sample ignore rule; adjust as needed
+# version: 2
+# updates:
+#   - package-ecosystem: npm
+#     directory: "/"
+#     schedule:
+#       interval: weekly
+#     open-pull-requests-limit: 10
+#     labels: ["deps", "automated"]
+#     ignore:
+#       - dependency-name: "typescript"
+#         versions: ["<5.0.0"]  # sample ignore rule; adjust as needed
