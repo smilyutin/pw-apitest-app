@@ -1,7 +1,6 @@
 {
   "devDependencies": {
     "@playwright/test": "^1.54.1",
-    "@types/dotenv": "^6.1.1",
     "@types/node": "^24.3.0",
     "audit-ci": "^7.1.0",
     "ts-node": "^10.9.2",
