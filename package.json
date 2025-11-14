@@ -6,7 +6,7 @@
     "audit-ci": "^7.1.0"
   },
   "dependencies": {
-    "dotenv": "^17.2.1"
+    "dotenv": "^17.2.3"
   },
   "scripts": {
     "test:sec": "npx playwright test tests/security",
