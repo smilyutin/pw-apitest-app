@@ -2,7 +2,7 @@
   "devDependencies": {
     "@playwright/test": "^1.56.1",
     "@types/dotenv": "^8.2.3",
-    "@types/node": "^24.10.0",
+    "@types/node": "^25.0.2",
     "audit-ci": "^7.1.0"
   },
   "dependencies": {
