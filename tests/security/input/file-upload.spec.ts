@@ -1,7 +1,6 @@
 import { test, expect, request as pwRequest, APIRequestContext } from '@playwright/test';
 import { accessToken } from '../../../utils/token';
-
-const API = 'https://conduit-api.bondaracademy.com';
+import { API } from '../../fixture/security-urls';
 const SOFT = process.env.SECURITY_SOFT === '1';
 
 // Soft assertion helper

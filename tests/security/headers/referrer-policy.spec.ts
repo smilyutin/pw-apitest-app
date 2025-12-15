@@ -1,7 +1,6 @@
 // tests/security/headers/referrer-policy.spec.ts
 import { test, expect } from '@playwright/test';
-
-const APP = 'https://conduit.bondaracademy.com';
+import { APP } from '../../fixture/security-urls';
 
 // Allow CI to pass but still warn if policy is weak.
 // Run with: SECURITY_SOFT=1 npx playwright test ...

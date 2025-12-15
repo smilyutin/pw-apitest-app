@@ -1,7 +1,6 @@
 // tests/security/authorization/idor.spec.ts
 import { test, expect, request as pwRequest, APIRequestContext } from '@playwright/test';
-
-const API = 'https://conduit-api.bondaracademy.com';
+import { API } from '../../fixture/security-urls';
 const jsonHeaders = { 'Content-Type': 'application/json' };
 
 async function newApi(): Promise<APIRequestContext> {

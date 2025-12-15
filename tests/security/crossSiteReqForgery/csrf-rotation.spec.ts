@@ -1,8 +1,7 @@
 // tests/security/csrf/csrf-rotation.spec.ts
 //Token bound to session (rotates, not reused across users).
 import { test, expect, request as pwRequest } from '@playwright/test';
-
-const API = 'https://conduit-api.bondaracademy.com';
+import { API } from '../../fixture/security-urls';
 const json = { 'Content-Type': 'application/json' };
 
 // Global soft mode (used for non-rotation soft checks if you want later)

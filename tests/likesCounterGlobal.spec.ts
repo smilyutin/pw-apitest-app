@@ -1,4 +1,5 @@
 import { test, expect } from './fixture/authed-request';
+import { APP } from './fixture/security-urls';
 import fs from 'fs';
 
 const slugFile = '.auth/article.json';
@@ -7,14 +8,14 @@ test('Global like counter increase now', async ({ page }) => {
   test.slow();
 
   // 1 Load slug of the created article
-  if (!fs.existsSync(slugFile)) throw new Error('❌ slugFile not found.');
+  if (!fs.existsSync(slugFile)) throw new Error(' slugFile not found.');
   const content = fs.readFileSync(slugFile, 'utf-8');
-  if (!content) throw new Error('❌ article.json is empty!');
+  if (!content) throw new Error(' article.json is empty!');
   const { slugId } = JSON.parse(content);
   console.log('Target slug for like:', slugId);
 
   // 2 Open Global Feed
-  await page.goto('https://conduit.bondaracademy.com/', { waitUntil: 'load' });
+  await page.goto(APP, { waitUntil: 'load' });
 await page.screenshot({ path: 'debug.png' }); // Save a screenshot
 await expect(page.getByText('Global Feed')).toBeVisible({ timeout: 10000 });
   await page.getByText('Global Feed').click();

@@ -1,16 +1,15 @@
 import { test, expect } from '@playwright/test';
-
-const UI = process.env.UI_ORIGIN ?? 'https://conduit.bondaracademy.com';
+import { APP } from '../../fixture/security-urls';
 
 const ALLOWLIST = new Set([
-  new URL(UI).origin,               // first-party
+  new URL(APP).origin,               // first-party
   // 'https://cdn.jsdelivr.net',
   // 'https://unpkg.com',
 ]);
 
 test.describe.skip('[security] Supply chain: CSP allowlist + SRI for 3rd-party', () => {
   test('All <script src> are from allowlist; 3rd-party have SRI', async ({ page }) => {
-    const res = await page.goto(UI, { waitUntil: 'domcontentloaded' });
+    const res = await page.goto(APP, { waitUntil: 'domcontentloaded' });
     expect(res).toBeTruthy();
 
     // Grab CSP (response header or <meta http-equiv>)
@@ -40,7 +39,7 @@ test.describe.skip('[security] Supply chain: CSP allowlist + SRI for 3rd-party',
       expect(ALLOWLIST.has(origin), `Unexpected script origin: ${s.src}`).toBeTruthy();
 
       // If third-party (not your origin), demand SRI + proper crossorigin
-      const isThirdParty = origin !== new URL(UI).origin;
+      const isThirdParty = origin !== new URL(APP).origin;
       if (isThirdParty) {
         expect(Boolean(s.integrity), `3rd-party script must use SRI: ${s.src}`).toBeTruthy();
         // browsers require crossorigin for SRI on cross-origin in many setups

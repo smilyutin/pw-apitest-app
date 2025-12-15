@@ -1,7 +1,6 @@
 // tests/security/xss-csp-storage.spec.ts
 import { test, expect } from '@playwright/test';
-
-const APP = 'https://conduit.bondaracademy.com';
+import { APP } from '../../fixture/security-urls';
 
 // Pages worth scanning; add more as needed.
 const PAGES = [

@@ -1,7 +1,6 @@
 // tests/security/headers/permissions-policy.spec.ts
 import { test, expect } from '@playwright/test';
-
-const APP = 'https://conduit.bondaracademy.com';
+import { APP } from '../../fixture/security-urls';
 
 // Soft mode: SECURITY_SOFT=1 lets CI pass but logs warnings.
 const SOFT = process.env.SECURITY_SOFT === '1';

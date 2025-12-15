@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
-
-const APP = process.env.APP_URL ?? 'https://conduit.bondaracademy.com';
+import { APP } from '../../fixture/security-urls';
 const SOFT = process.env.SECURITY_SOFT === '1';
 
 // soft assertion helper (let CI pass but still warn)

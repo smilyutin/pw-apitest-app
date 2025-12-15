@@ -1,4 +1,5 @@
 import { test, expect } from './fixture/authed-request';
+import { API, APP } from './fixture/security-urls';
 import tags from '../test-data/tags.json';
 
 test.beforeEach(async ({ page }) => {
@@ -13,7 +14,7 @@ test.beforeEach(async ({ page }) => {
 
   // 2 Navigate to the application as an already logged-in user
   // Login is handled via storageState from .auth/user.json
-  await page.goto('https://conduit.bondaracademy.com/');
+  await page.goto(APP);
 });
 
 
@@ -26,7 +27,7 @@ test('delete article via API creation and UI deletion', async ({ page, request }
   /**
    * Step 1: Create article via API (Authorization auto-attached)
    */
-  const createResponse = await request.post('https://conduit-api.bondaracademy.com/api/articles', {
+  const createResponse = await request.post(`${API}/api/articles`, {
     data: {
       article: {
         title: 'Delete Me Article',
@@ -45,7 +46,7 @@ test('delete article via API creation and UI deletion', async ({ page, request }
   /**
    * Step 2: Visit article in UI and delete it
    */
-  await page.goto(`https://conduit.bondaracademy.com/article/${slug}`);
+  await page.goto(`${APP}/article/${slug}`);
   await expect(page.locator('.article-page h1')).toContainText('Delete Me Article');
 
   console.log(' EXPECT PASSED: Article is visible in the UI before deletion');
@@ -93,14 +94,12 @@ test('create article and clean up via API', async ({ page, request }) => {
   await expect(page.locator('.article-page h1')).toContainText('Playwright is awesome');
 
   // Step 5: Delete article via API using token from storageState (token-driven)
-  const deleteResponse = await request.delete(
-    `https://conduit-api.bondaracademy.com/api/articles/${slugId}`
-  );
+  const deleteResponse = await request.delete(`${API}/api/articles/${slugId}`);
   expect(deleteResponse.status()).toBe(204);
   console.log(' Article deleted via API');
 
   // Step 6: Confirm article is gone from feed
-  await page.goto('https://conduit.bondaracademy.com/');
+  await page.goto(APP);
   await page.getByText('Global Feed').click();
   await expect(page.locator('app-article-list h1', { hasText: 'Playwright is awesome' })).toHaveCount(0);
   console.log(' EXPECT PASSED: Article successfully removed from the UI feed');

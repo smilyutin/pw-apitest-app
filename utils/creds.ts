@@ -26,7 +26,7 @@ export function getCreds(role: 'user' | 'admin' = 'user'): Creds {
       fileCreds = JSON.parse(fs.readFileSync(secretsPath, 'utf-8'));
     }
   } catch (err) {
-    console.warn(`⚠️ Could not read ${secretsPath}:`, err);
+    console.warn(`Could not read ${secretsPath}:`, err);
   }
 
   // Allow environment overrides (CI/CD friendly)

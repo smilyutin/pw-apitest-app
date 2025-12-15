@@ -1,8 +1,7 @@
 import { test, expect, request as pwRequest } from '@playwright/test';
 import fs from 'fs';
 import { parseJwt, withAlgNone, withPayloadMutation, withBrokenSignature } from '../../../utils/jwt-utils';
-
-const BASE_URL = 'https://conduit-api.bondaracademy.com';
+import { API } from '../../fixture/security-urls';
 const AUTH_FILE = '.auth/user.json';
 
 // pull the real token written by your global setup
@@ -19,7 +18,7 @@ test.describe('[JWT] Integrity & Policy', () => {
     const bad = withAlgNone(good);
 
     const ctx = await pwRequest.newContext();
-    const res = await ctx.get(`${BASE_URL}/api/user`, {
+    const res = await ctx.get(`${API}/api/user`, {
       headers: { Authorization: `Token ${bad}` },
     });
 
@@ -34,7 +33,7 @@ test.describe('[JWT] Integrity & Policy', () => {
     const bad = withPayloadMutation(good, { exp: now + 60 * 60 * 24 * 365, admin: true });
 
     const ctx = await pwRequest.newContext();
-    const res = await ctx.get(`${BASE_URL}/api/user`, {
+    const res = await ctx.get(`${API}/api/user`, {
       headers: { Authorization: `Token ${bad}` },
     });
 
@@ -46,7 +45,7 @@ test.describe('[JWT] Integrity & Policy', () => {
     const bad = withBrokenSignature(good);
 
     const ctx = await pwRequest.newContext();
-    const res = await ctx.get(`${BASE_URL}/api/user`, {
+    const res = await ctx.get(`${API}/api/user`, {
       headers: { Authorization: `Token ${bad}` },
     });
 

@@ -1,9 +1,8 @@
 import { test, expect, request as pwRequest } from '@playwright/test';
 import { accessToken } from '../../../utils/token';
+import { APP, API } from '../../fixture/security-urls';
 //npx playwright test tests/security/input/xss.spec.ts -g "URL-injection"
 // Target app/API
-const APP = 'https://conduit.bondaracademy.com';
-const API = 'https://conduit-api.bondaracademy.com';
 
 // Soft mode lets CI pass but still logs a warning
 const SOFT = process.env.SECURITY_SOFT === '1';
@@ -27,7 +26,7 @@ const PAYLOADS = [
   `<svg/onload=window.__pwned__='S3'>`,
 ];
 
-test.describe.skip('[security] XSS (stored & basic URL injection)', () => {
+test.describe('[security] XSS (stored & basic URL injection)', () => {
   test('Stored XSS: article title/body must not execute HTML/JS', async ({ page }) => {
     const ctx = await api();
     const payload = PAYLOADS[1]; // onerror payload is a good canary

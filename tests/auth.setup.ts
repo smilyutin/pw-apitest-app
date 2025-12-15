@@ -3,8 +3,8 @@ import { test as setup, expect, request, APIRequestContext } from '@playwright/t
 import fs from 'fs';
 import path from 'path';
 import { getCreds } from '../utils/creds';
+import { API, APP } from './fixture/security-urls';
 
-const API = 'https://conduit-api.bondaracademy.com';
 const AUTH_FILE = path.join(process.cwd(), '.auth', 'user.json');
 
 function ensureAuthFileSkeleton() {
@@ -16,7 +16,7 @@ function ensureAuthFileSkeleton() {
         {
           origins: [
             {
-              origin: 'https://conduit.bondaracademy.com',
+              origin: APP,
               localStorage: [{ name: 'jwtToken', value: '' }],
             },
           ],

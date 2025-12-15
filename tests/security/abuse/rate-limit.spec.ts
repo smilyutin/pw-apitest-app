@@ -1,7 +1,6 @@
 // tests/security/abuse/rate-limit.spec.ts
 import { test, expect, request as pwRequest } from '@playwright/test';
-
-const API = 'https://conduit-api.bondaracademy.com';
+import { API } from '../../fixture/security-urls';
 const SOFT = process.env.SECURITY_SOFT === '1';
 const BURST = Number(process.env.RL_BURST || 25);       // how many requests in the burst
 const CONCURRENCY = Number(process.env.RL_CONC || 10);  // concurrent workers

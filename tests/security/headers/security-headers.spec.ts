@@ -3,9 +3,9 @@
 // nosniff, Referrer-Policy, Permissions-Policy (not wildcard), and HSTS with sane values
 
 import { test, expect } from '@playwright/test';
+import { APP } from '../../fixture/security-urls';
 
 // === CONFIG ===
-const APP = process.env.UI_ORIGIN || 'https://conduit.bondaracademy.com';
 const SOFT = process.env.SECURITY_SOFT === '1'; // set to "1" to warn instead of fail hard
 
 const expectSoft = (ok: boolean, msg: string) => {

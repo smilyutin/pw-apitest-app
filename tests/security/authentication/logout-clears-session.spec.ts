@@ -2,8 +2,7 @@
 import { test, expect } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
-
-const APP = 'https://conduit.bondaracademy.com';
+import { APP } from '../../fixture/security-urls';
 
 function readStorageState(p = '.auth/user.json') {
   return JSON.parse(fs.readFileSync(p, 'utf-8'));

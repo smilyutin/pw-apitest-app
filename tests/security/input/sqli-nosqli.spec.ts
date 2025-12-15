@@ -1,6 +1,6 @@
 import { test, expect, request as pwRequest, APIRequestContext } from '@playwright/test';
+import { API } from '../../fixture/security-urls';
 //npx playwright test tests/security/input/sqli-nosqli.spec.ts
-const API = 'https://conduit-api.bondaracademy.com';
 const SOFT = process.env.SECURITY_SOFT === '1';
 const json = { 'Content-Type': 'application/json' };
 
@@ -91,7 +91,7 @@ test.describe('[security] SQLi / NoSQLi probing', () => {
 
     const baseCount = Array.isArray(baseJson?.articles) ? baseJson.articles.length : 0;
     // Baseline should be empty; if not, we still use it for comparison (no expansion allowed)
-    console.log(`ℹ️ Baseline count for tag="${uniqueTag}" is ${baseCount}`);
+    console.log(` Baseline count for tag="${uniqueTag}" is ${baseCount}`);
 
     const allProbes = [...SQLI_PROBES, ...NOSQLI_PROBES];
 

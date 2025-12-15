@@ -2,9 +2,9 @@ name: Security Checks
 
 on:
   pull_request:
-    branches: [main, master]
+    branches: [gov, govn]
   push:
-    branches: [main, master]
+    branches: [gov, govn]
   workflow_dispatch:
 
 permissions:

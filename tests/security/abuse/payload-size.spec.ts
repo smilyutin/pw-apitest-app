@@ -1,7 +1,6 @@
 import { test, expect, request as pwRequest } from '@playwright/test';
 import fs from 'fs';
-
-const API = process.env.API_ORIGIN || 'https://conduit-api.bondaracademy.com';
+import { API } from '../../fixture/security-urls';
 const json = { 'Content-Type': 'application/json' };
 
 // Default to SOFT unless you set SECURITY_STRICT=1 (or SECURITY_SOFT=0)

@@ -1,7 +1,6 @@
 // tests/security/headers/nosniff.spec.ts
 import { test, expect } from '@playwright/test';
-
-const APP = 'https://conduit.bondaracademy.com';
+import { APP } from '../../fixture/security-urls';
 
 test.describe.skip('[security-headers] X-Content-Type-Options', () => {
   test('Response must send X-Content-Type-Options: nosniff', async ({ page }) => {

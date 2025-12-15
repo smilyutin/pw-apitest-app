@@ -71,13 +71,13 @@ class ElementSimilarityAnalyzer {
 
   async initialize(): Promise<void> {
     this.browser = await chromium.launch({ headless: CLI.headless });
-    console.log('🟢 Browser launched.');
+    console.log(' Browser launched.');
   }
 
   async cleanup(): Promise<void> {
     if (this.browser) {
       await this.browser.close();
-      console.log('🟢 Browser closed.');
+      console.log(' Browser closed.');
     }
   }
 
@@ -90,7 +90,7 @@ class ElementSimilarityAnalyzer {
     const page = await (this.browser as Browser).newPage();
     try {
       await page.goto(url, { waitUntil: 'networkidle', timeout: 45_000 });
-      console.log(`🌐 ${url}`);
+      console.log(`${url}`);
       return page;
     } catch (e) {
       await page.close();

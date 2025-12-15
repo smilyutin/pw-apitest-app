@@ -1,8 +1,7 @@
 //Role scoping: endpoints enforce least privilege (e.g., viewer vs admin).
 import path from 'path';
 import fs from 'fs';
-
-const API = 'https://conduit-api.bondaracademy.com';
+import { API } from '../../fixture/security-urls';
 const json = (p: string) => JSON.parse(fs.readFileSync(p, 'utf-8'));
 
 const matrixPath = path.resolve(__dirname, 'rbac-matrix.json');

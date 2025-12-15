@@ -2,8 +2,8 @@
 import { test as base, APIRequestContext, request, expect } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
+import { API } from './security-urls';
 
-const BASE_URL = 'https://conduit-api.bondaracademy.com';
 const AUTH_FILE = path.join(process.cwd(), '.auth/user.json');
 
 // Read jwtToken from your saved storage state
@@ -18,7 +18,7 @@ function readToken(): string | undefined {
 
 // Decide which endpoints **must** be authed
 function requiresAuth(url: string, method: string): boolean {
-  const u = new URL(url, BASE_URL);
+  const u = new URL(url, API);
   const p = u.pathname;
   const m = method.toUpperCase();
 
@@ -72,7 +72,7 @@ export const test = base.extend<Fixtures>({
   authedRequest: async ({}, use) => {
     const token = readToken();
     const ctx = await request.newContext({
-      baseURL: BASE_URL,
+      baseURL: API,
       extraHTTPHeaders: token ? { Authorization: `Token ${token}` } : {},
     });
     const guarded = wrapWithAuthGuard(ctx);
