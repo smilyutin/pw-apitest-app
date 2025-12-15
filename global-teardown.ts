@@ -11,7 +11,7 @@ async function globalTeardown() {
 
   // Guard: only continue if slug + token exist
   if (!fs.existsSync(slugFile) || !fs.existsSync(tokenFile)) {
-    console.log('🧹 Nothing to clean up (no slug/token file found).');
+    console.log(' Nothing to clean up (no slug/token file found).');
     return;
   }
 
@@ -19,7 +19,7 @@ async function globalTeardown() {
   const slugJson = JSON.parse(fs.readFileSync(slugFile, 'utf-8'));
   const slug = slugJson?.slug;
   if (!slug) {
-    console.log('🧹 No slug in slug file, skipping delete.');
+    console.log(' No slug in slug file, skipping delete.');
     return;
   }
 
@@ -27,11 +27,11 @@ async function globalTeardown() {
   const tokenJson = JSON.parse(fs.readFileSync(tokenFile, 'utf-8'));
   const token = tokenJson?.user?.token;
   if (!token) {
-    console.log('🧹 No token in token file, skipping delete.');
+    console.log(' No token in token file, skipping delete.');
     return;
   }
 
-  console.log('🔥 articleCleanUp started!');
+  console.log(' articleCleanUp started!');
   const ctx = await request.newContext({ baseURL: API });
   try {
     const res = await ctx.delete(`/api/articles/${slug}`, {
@@ -43,14 +43,14 @@ async function globalTeardown() {
     console.log(`Delete body: ${body}`);
 
     if (status === 204) {
-      console.log('🧹 Article deleted in teardown.');
+      console.log(' Article deleted in teardown.');
       fs.unlinkSync(slugFile);
-      console.log('🧹 Slug file deleted after cleanup.');
+      console.log(' Slug file deleted after cleanup.');
     } else {
-      console.warn('⚠️ Delete did not succeed, leaving slug file for inspection.');
+      console.warn(' Delete did not succeed, leaving slug file for inspection.');
     }
   } catch (e) {
-    console.error('⚠️ Error during article cleanup:', e);
+    console.error(' Error during article cleanup:', e);
   } finally {
     await ctx.dispose();
   }

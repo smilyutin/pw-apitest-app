@@ -6,5 +6,5 @@ export const accessToken = userData?.origins?.[0]?.localStorage?.find(
 )?.value;
 
 if (!accessToken) {
-  throw new Error('❌ accessToken not found in .auth/user.json');
+  throw new Error('accessToken not found in .auth/user.json');
 }

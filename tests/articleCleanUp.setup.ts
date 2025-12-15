@@ -1,5 +1,6 @@
 // tests/articleCleanUp.setup.ts
 import { test as teardown, expect } from './fixture/authed-request';
+import { API } from './fixture/security-urls';
 import fs from 'fs';
 
 const slugFile = '.auth/article.json';
@@ -23,7 +24,7 @@ teardown('delete article', async ({ request }) => {
 
   // 3 DELETE request
   const deleteResponse = await request.delete(
-    `https://conduit-api.bondaracademy.com/api/articles/${slugId}`,
+    `${API}/api/articles/${slugId}`,
     {
       headers: { Authorization: `Token ${token}` },
     }

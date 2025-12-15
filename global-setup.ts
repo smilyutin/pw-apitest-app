@@ -5,10 +5,10 @@ async function globalSetup() {
   const authFile = '.auth/user.json';           // Storage for login session
   const slugFile = '.auth/article.json';        // Storage for created article slug
 
-  // 🔐 1. Create API request context
+  //  1. Create API request context
   const context = await request.newContext();
 
-  // 🔐 2. Login to Conduit API and get token
+  //  2. Login to Conduit API and get token
   const loginResponse = await context.post('https://conduit-api.bondaracademy.com/api/users/login', {
     data: {
       user: {
@@ -19,14 +19,13 @@ async function globalSetup() {
     headers: { 'Content-Type': 'application/json' },
   });
 
-  // ✅ Assert login worked
+  //  Assert login worked
   expect(loginResponse.ok()).toBeTruthy();
-
   // 🔑 Extract token from response
   const loginBody = await loginResponse.json();
   const accessToken = loginBody.user.token;
 
-  // 💾 3. Save token in .auth/user.json (used for UI session in storageState)
+  //  3. Save token in .auth/user.json (used for UI session in storageState)
   const userData = {
     origins: [{
       origin: 'https://conduit.bondaracademy.com',
@@ -41,7 +40,7 @@ async function globalSetup() {
   fs.writeFileSync(authFile, JSON.stringify(userData, null, 2));     // Save token to file
   console.log('✅ Token saved to user.json');
 
-  // 📝 4. Create a new article with unique title
+  //  4. Create a new article with unique title
   const articleResponse = await context.post(
     'https://conduit-api.bondaracademy.com/api/articles',
     {
@@ -57,15 +56,15 @@ async function globalSetup() {
     }
   );
 
-  // ✅ Verify article creation success
+  //  Verify article creation success
   expect(articleResponse.status()).toBe(201);
 
-  // 🧾 5. Save article slug for later test reference and deletion
+  //  5. Save article slug for later test reference and deletion
   const articleBody = await articleResponse.json();
   const slugId = articleBody.article.slug;
 
   fs.writeFileSync(slugFile, JSON.stringify({ slugId }, null, 2));
-  console.log(`✅ Article created: ${slugId}`);
+  console.log(`Article created: ${slugId}`);
 }
 
 export default globalSetup;

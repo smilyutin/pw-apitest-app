@@ -1,5 +1,6 @@
 // tests/newArticle.setup.ts
 import { test as setup, expect } from './fixture/authed-request';
+import { API } from './fixture/security-urls';
 import fs from 'fs';
 
 const slugFile = '.auth/article.json';
@@ -12,7 +13,7 @@ setup('create new article', async ({ request }) => {
 
   // 2 POST create article using auth token (via Playwright request)
   const articleResponse = await request.post(
-    'https://conduit-api.bondaracademy.com/api/articles',
+    `${API}/api/articles`,
     {
       data: {
         article: {
@@ -33,7 +34,7 @@ setup('create new article', async ({ request }) => {
 
   console.log('Article created:', slugId);
 
-  // 3️⃣ Save slug & author for teardown
+  // 3 Save slug & author for teardown
   const articleData = {
     slugId,
     author: response.article.author.username

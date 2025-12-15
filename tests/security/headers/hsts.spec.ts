@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
-
-const APP = 'https://conduit.bondaracademy.com';
+import { APP } from '../../fixture/security-urls';
 
 // Soft mode: SECURITY_SOFT=1 lets CI pass while still logging warnings.
 const SOFT = process.env.SECURITY_SOFT === '1';
@@ -27,22 +26,32 @@ function parseHsts(value: string) {
   return out;
 }
 
-test.describe.skip('[security-headers] HSTS', () => {
+test.describe('[security-headers] HSTS', () => {
   test('Strict-Transport-Security header is present and strong', async ({ page }) => {
     // Must be HTTPS for HSTS to be meaningful
-    const res = await page.goto(APP, { waitUntil: 'domcontentloaded' });
+    // Ensure APP uses https:// protocol
+    const url = APP.startsWith('https://') ? APP : APP.replace(/^http:/, 'https:');
+    
+    const res = await page.goto(url, { waitUntil: 'domcontentloaded' });
     expect(res, 'Navigation should succeed').toBeTruthy();
 
     const headers = res!.headers();
     // header keys are lowercased in Playwright
     const hsts = headers['strict-transport-security'];
 
-    expect(
-      hsts,
+    expectSoft(
+      !!hsts,
       'Missing Strict-Transport-Security header on HTTPS response.'
-    ).toBeTruthy();
+    );
 
-    const parsed = parseHsts(hsts || '');
+    if (!hsts) {
+      if (!SOFT) {
+        throw new Error('HSTS header missing - cannot proceed with validation');
+      }
+      return; // Skip remaining checks in soft mode
+    }
+
+    const parsed = parseHsts(hsts);
     const maxAgeRaw = parsed['max-age'];
     const includeSub = !!parsed['includesubdomains']; // header token is includeSubDomains
     const preload = !!parsed['preload'];

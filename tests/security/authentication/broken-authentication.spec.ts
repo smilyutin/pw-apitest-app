@@ -1,13 +1,12 @@
 // tests/security/broken-authentication.spec.ts
 import { test, expect, request } from '@playwright/test';
 import { accessToken } from '../../../utils/token';
-
-const BASE_URL = 'https://conduit-api.bondaracademy.com';
+import { API } from '../../fixture/security-urls';
 
 // 1 Invalid login attempt
 test('Invalid login should return 403 or 422', async () => {
   const context = await request.newContext();
-  const response = await context.post(`${BASE_URL}/api/users/login`, {
+  const response = await context.post(`${API}/api/users/login`, {
     data: {
       user: {
         email: 'invalid@email.com',
@@ -23,7 +22,7 @@ test('Invalid login should return 403 or 422', async () => {
 // 2 Expired or invalid token test
 test('Access with invalid token should be denied', async () => {
   const context = await request.newContext();
-  const response = await context.get(`${BASE_URL}/api/user`, {
+  const response = await context.get(`${API}/api/user`, {
     headers: {
       Authorization: `Token expired.or.invalid.token`,
     },
@@ -34,7 +33,7 @@ test('Access with invalid token should be denied', async () => {
 
 // 3 Unauthorized Access (BOLA)
 test('Should not allow access to another user’s article', async ({ request }) => {
-  const response = await request.get(`${BASE_URL}/api/articles/some-other-users-article`, {
+  const response = await request.get(`${API}/api/articles/some-other-users-article`, {
     headers: { Authorization: `Token ${accessToken}` },
   });
 
@@ -43,7 +42,7 @@ test('Should not allow access to another user’s article', async ({ request }) 
 
 // 4 Mass Assignment Check
 test('Should ignore unauthorized fields in registration', async ({ request }) => {
-  const response = await request.post(`${BASE_URL}/api/users`, {
+  const response = await request.post(`${API}/api/users`, {
     data: {
       user: {
         username: 'testuser_' + Date.now(),
@@ -64,7 +63,7 @@ test('Should ignore unauthorized fields in registration', async ({ request }) =>
 
 // 5 Security Headers Validation
 test('Should contain essential security headers', async ({ request }) => {
-  const response = await request.get(`${BASE_URL}/api/user`, {
+  const response = await request.get(`${API}/api/user`, {
     headers: { Authorization: `Token ${accessToken}` },
   });
 
@@ -95,7 +94,7 @@ test.describe('Security Fuzzing with Malicious Input', () => {
 
   for (const payload of fuzzPayloads) {
     test(`Should reject malicious input: ${payload}`, async ({ request }) => {
-      const response = await request.post(`${BASE_URL}/api/comments`, {
+      const response = await request.post(`${API}/api/comments`, {
         data: { comment: payload },
         headers: { Authorization: `Token ${accessToken}` },
       });

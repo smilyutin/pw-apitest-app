@@ -1,8 +1,7 @@
 // tests/security/bruteforce-lockout.spec.ts
 import { test, expect, request } from '@playwright/test';
 import fs from 'fs';
-
-const API = 'https://conduit-api.bondaracademy.com';
+import { API } from '../../fixture/security-urls';
 const SOFT = process.env.SECURITY_SOFT === '1';                 // soft-warn mode for CI
 const MAX_ATTEMPTS = Number(process.env.BF_ATTEMPTS || 10);
 

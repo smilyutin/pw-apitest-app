@@ -1,0 +1,156 @@
+{
+  "timestamp": "2025-08-27T19:19:23.113Z",
+  "summary": {
+    "totalGroups": 7,
+    "basePageRecommendations": 7
+  },
+  "groups": [
+    {
+      "suggestedLocator": ".navbar",
+      "suggestedName": "conduitHomeSignInSignUpNavigation",
+      "elementType": "nav",
+      "commonAttributes": [
+        "tagName",
+        "classes(navbar,navbar-light)",
+        "text"
+      ],
+      "pages": [
+        "https://conduit.bondaracademy.com/",
+        "https://conduit.bondaracademy.com/profile",
+        "https://conduit.bondaracademy.com/settings"
+      ],
+      "selectors": [
+        "nav.navbar.navbar-light",
+        "nav.navbar.navbar-light"
+      ],
+      "confidence": 61.11,
+      "pomRecommendation": "Consider for BasePage - may need overrides"
+    },
+    {
+      "suggestedLocator": "getByRole('link', { name: \"conduit\" })",
+      "suggestedName": "conduitLink",
+      "elementType": "a",
+      "commonAttributes": [
+        "tagName",
+        "classes(navbar-brand)",
+        "text"
+      ],
+      "pages": [
+        "https://conduit.bondaracademy.com/",
+        "https://conduit.bondaracademy.com/profile",
+        "https://conduit.bondaracademy.com/settings"
+      ],
+      "selectors": [
+        "a.navbar-brand",
+        "a.navbar-brand",
+        "a.logo-font"
+      ],
+      "confidence": 50,
+      "pomRecommendation": "Consider for BasePage - may need overrides"
+    },
+    {
+      "suggestedLocator": "getByRole('link', { name: \"Sign in\" })",
+      "suggestedName": "signInLink",
+      "elementType": "a",
+      "commonAttributes": [
+        "tagName",
+        "classes(nav-link)",
+        "text"
+      ],
+      "pages": [
+        "https://conduit.bondaracademy.com/",
+        "https://conduit.bondaracademy.com/profile",
+        "https://conduit.bondaracademy.com/settings"
+      ],
+      "selectors": [
+        "a.nav-link",
+        "a.nav-link"
+      ],
+      "confidence": 50,
+      "pomRecommendation": "Consider for BasePage - may need overrides"
+    },
+    {
+      "suggestedLocator": "getByRole('link', { name: \"conduit\" })",
+      "suggestedName": "conduitLink",
+      "elementType": "a",
+      "commonAttributes": [
+        "tagName",
+        "classes(logo-font)",
+        "text"
+      ],
+      "pages": [
+        "https://conduit.bondaracademy.com/",
+        "https://conduit.bondaracademy.com/profile",
+        "https://conduit.bondaracademy.com/settings"
+      ],
+      "selectors": [
+        "a.logo-font",
+        "a.logo-font",
+        "a.navbar-brand"
+      ],
+      "confidence": 50,
+      "pomRecommendation": "Consider for BasePage - may need overrides"
+    },
+    {
+      "suggestedLocator": "getByRole('link', { name: \"Discover Bondar Academy: Your Gateway to Efficient LearningDiscover Bondar Academy's unique place in\" })",
+      "suggestedName": "discoverBondarAcademyYourGatewayToEfficientLearningdiscoverBondarAcademySUniquePlaceInLink",
+      "elementType": "a",
+      "commonAttributes": [
+        "tagName",
+        "text"
+      ],
+      "pages": [
+        "https://conduit.bondaracademy.com/",
+        "https://conduit.bondaracademy.com/profile",
+        "https://conduit.bondaracademy.com/settings"
+      ],
+      "selectors": [
+        "a.preview-link",
+        "a",
+        "a.nav-link"
+      ],
+      "confidence": 38.89,
+      "pomRecommendation": "Page-specific locator - avoid BasePage"
+    },
+    {
+      "suggestedLocator": "getByRole('link', { name: \"RealWorld OSS Project\" })",
+      "suggestedName": "realworldOssProjectLink",
+      "elementType": "a",
+      "commonAttributes": [
+        "tagName",
+        "text"
+      ],
+      "pages": [
+        "https://conduit.bondaracademy.com/",
+        "https://conduit.bondaracademy.com/profile",
+        "https://conduit.bondaracademy.com/settings"
+      ],
+      "selectors": [
+        "a",
+        "a"
+      ],
+      "confidence": 38.89,
+      "pomRecommendation": "Page-specific locator - avoid BasePage"
+    },
+    {
+      "suggestedLocator": "footer",
+      "suggestedName": "conduit2025AnInteractiveLearningProjectFromRealworldOssProjectCodeLicensedUnderMitFooter",
+      "elementType": "footer",
+      "commonAttributes": [
+        "tagName",
+        "text"
+      ],
+      "pages": [
+        "https://conduit.bondaracademy.com/",
+        "https://conduit.bondaracademy.com/profile",
+        "https://conduit.bondaracademy.com/settings"
+      ],
+      "selectors": [
+        "footer",
+        "footer"
+      ],
+      "confidence": 38.89,
+      "pomRecommendation": "Page-specific locator - avoid BasePage"
+    }
+  ]
+}

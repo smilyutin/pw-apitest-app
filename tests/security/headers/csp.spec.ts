@@ -1,13 +1,12 @@
 //test verifies UI sets a Content-Security-Policy and that it avoids the dangerous bits like unsafe-inline/unsafe-eval
 import { test, expect } from '@playwright/test';
+import { APP } from '../../fixture/security-urls';
 //SECURITY_SOFT=1 npx playwright test tests/headers/csp.spec.ts
-
-const APP = process.env.PW_BASE_URL ?? 'https://conduit.bondaracademy.com';
 const SOFT = process.env.SECURITY_SOFT === '1'; // soft-warn instead of fail hard
 
 function soft(cond: boolean, msg: string) {
   if (!cond) {
-    if (SOFT) console.warn('⚠️ [soft] ' + msg);
+    if (SOFT) console.warn(' [soft] ' + msg);
     else throw new Error(msg);
   }
 }
@@ -26,20 +25,23 @@ function parseCsp(header: string | undefined): CSPMap {
   return map;
 }
 
-async function getCspFromPage(page): Promise<{header?: string; meta?: string}> {
+async function getCspFromPage(page: import('@playwright/test').Page): Promise<{header?: string; meta?: string}> {
   // Prefer response header from the navigation request
-  const res = page.mainFrame()._response?.response(); // internal; fallback below if undefined
-  let header: string | undefined;
-  try { header = res?.headers()['content-security-policy']; } catch {}
-  // Fallback: <meta http-equiv="Content-Security-Policy" content="...">
-  const meta: string | undefined = await page.evaluate(() => {
+  let cspHeader: string | undefined;
+  page.once('response', (response) => {
+    if (response.url() === page.url()) {
+      cspHeader = response.headers()['content-security-policy'];
+    }
+  });
+  const cspMeta = await page.evaluate(() => {
     const el = document.querySelector('meta[http-equiv="Content-Security-Policy"]') as HTMLMetaElement | null;
     return el?.content || undefined;
   });
-  return { header, meta };
+  const csp = cspHeader || cspMeta || '';
+  return { header: cspHeader, meta: cspMeta };
 }
 
-test.describe.skip('[security] Content-Security-Policy', () => {
+test.describe('[security] Content-Security-Policy', () => {
   // Add more UI routes here if useful
   const PAGES = ['/', '/login', '/editor'];
 

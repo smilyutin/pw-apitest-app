@@ -1,9 +1,7 @@
 // tests/security/auth.cookies.spec.ts
 import { test, expect, request as pwRequest } from '@playwright/test';
 import fs from 'fs';
-
-const APP_URL = 'https://conduit.bondaracademy.com';
-const API_URL = 'https://conduit-api.bondaracademy.com';
+import { APP, API } from '../../fixture/security-urls';
 
 // Cookie names that would indicate an auth/session cookie if they ever appear.
 // Adjust or extend as your backend evolves.
@@ -27,12 +25,12 @@ test.describe('Authentication & session cookie flags', () => {
     const page = await context.newPage();
 
     // --- Visit app (logged in via localStorage JWT) ---
-    await page.goto(APP_URL);
+    await page.goto(APP);
 
     // Collect cookies for app and API origins (some libs set cookies on either)
     const cookies = await context.cookies();
-    const appCookies   = cookies.filter(c => c.domain && APP_URL.includes(c.domain.replace(/^\./, '')));
-    const apiCookies   = cookies.filter(c => c.domain && API_URL.includes(c.domain.replace(/^\./, '')));
+    const appCookies   = cookies.filter(c => c.domain && APP.includes(c.domain.replace(/^\./,'')));
+    const apiCookies   = cookies.filter(c => c.domain && API.includes(c.domain.replace(/^\./,'')));
     const allRelevant  = [...new Map([...appCookies, ...apiCookies].map(c => [c.name + '@' + c.domain, c])).values()];
 
     // 1) Assert NO auth/session cookie is present (since you use localStorage token)
@@ -82,7 +80,7 @@ test.describe('Authentication & session cookie flags', () => {
 
   test('Login API does not leak cookies or, if present, has safe attributes', async () => {
     // Sanity: login via API (same as your setup) to inspect response headers
-    const ctx = await pwRequest.newContext({ baseURL: API_URL });
+    const ctx = await pwRequest.newContext({ baseURL: API });
     const res = await ctx.post('/api/users/login', {
       data: { user: { email: '1pwtest101@test.com', password: '1pwtest101@test.com' } },
       headers: { 'content-type': 'application/json' },

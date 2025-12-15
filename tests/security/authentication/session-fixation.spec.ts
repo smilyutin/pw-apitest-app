@@ -4,8 +4,7 @@
 // there should be no auth/session cookies at all—in that case we assert exactly that.
 
 import { test, expect, request as pwRequest } from '@playwright/test';
-
-const APP = 'https://conduit.bondaracademy.com';
+import { APP, API } from '../../fixture/security-urls';
 const EMAIL = '1pwtest101@test.com';
 const PASS  = '1pwtest101@test.com';
 
@@ -40,7 +39,7 @@ test.describe.skip('Session fixation', () => {
     } catch {
       // API login (JWT-only flow) — seed localStorage and reload
       const loginResp = await request.post(
-        'https://conduit-api.bondaracademy.com/api/users/login',
+        `${API}/api/users/login`,
         {
           data: { user: { email: EMAIL, password: PASS } },
           headers: { 'Content-Type': 'application/json' },

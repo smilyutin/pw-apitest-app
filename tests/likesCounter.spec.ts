@@ -1,4 +1,5 @@
 import { test, expect } from './fixture/authed-request';
+import { APP } from './fixture/security-urls';
 import fs from 'fs';
 
 const slugFile = '.auth/article.json';
@@ -12,7 +13,7 @@ test('Like counter increase now', async ({ page }) => {
   console.log(' Target slug for like:', slugId);
 
   // 2 Open Global Feed
-  await page.goto('https://conduit.bondaracademy.com/');
+  await page.goto(APP);
   await page.getByText('Global Feed').click();
 
   // 3 Find the correct <app-article-preview> by checking if it has the preview link with the slug

@@ -5,10 +5,7 @@
 // 	Preflight status sanity: allowed origins should return 200/204; disallowed origins should omit ACAO/ACAC (status may still be 200).
 
 import { test, expect, request as pwRequest } from '@playwright/test';
-
-const API = 'https://conduit-api.bondaracademy.com';
-const GOOD_ORIGIN = 'https://conduit.bondaracademy.com';
-const BAD_ORIGIN = 'https://evil.example';
+import { API, GOOD_ORIGIN, BAD_ORIGIN } from '../../fixture/security-urls';
 
 // Soft mode: let PRs warn without failing (CI main should be strict)
 const SOFT = process.env.SECURITY_SOFT === '1';

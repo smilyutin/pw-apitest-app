@@ -1,12 +1,14 @@
 {
   "devDependencies": {
-    "@playwright/test": "^1.57.0",
-    "@types/dotenv": "^8.2.3",
-    "@types/node": "^25.0.2",
-    "audit-ci": "^7.1.0"
+    "@playwright/test": "^1.54.1",
+    "@types/node": "^24.3.0",
+    "audit-ci": "^7.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
   },
   "dependencies": {
-    "dotenv": "^17.2.3"
+    "dotenv": "^17.2.1",
+    "playwright": "^1.57.0"
   },
   "scripts": {
     "test:sec": "npx playwright test tests/security",
@@ -14,6 +16,7 @@
     "audit:ci": "audit-ci --moderate || true",
     "test:sec:soft": "SECURITY_SOFT=1 npx playwright test tests/security",
     "test:headers": "npx playwright test tests/security/headers/security-headers.spec.ts",
-    "test:headers:soft": "SECURITY_SOFT=1 npx playwright test tests/security/headers/security-headers.spec.ts"
+    "test:headers:soft": "SECURITY_SOFT=1 npx playwright test tests/security/headers/security-headers.spec.ts",
+    "analyze:elements": "ts-node scripts/element-analyzer.ts"
   }
 }

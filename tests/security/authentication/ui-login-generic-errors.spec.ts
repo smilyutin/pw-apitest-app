@@ -1,8 +1,7 @@
 // tests/security/authentication/ui-login-generic-errors.spec.ts
 import { test, expect } from '@playwright/test';
 import path from 'path';
-
-const APP = 'https://conduit.bondaracademy.com';
+import { APP } from '../../fixture/security-urls';
 
 test.describe.skip('[security] Generic error messages in UI login', () => {
   // Force logged-out context just for this file

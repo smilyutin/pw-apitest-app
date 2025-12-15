@@ -2,8 +2,7 @@
 
 import { test, expect, request as pwRequest, APIRequestContext } from '@playwright/test';
 import { accessToken } from '../../../utils/token';
-
-const API = 'https://conduit-api.bondaracademy.com';
+import { API } from '../../fixture/security-urls';
 const json = { 'Content-Type': 'application/json' };
 
 // Require 403 only when explicitly asked (policy-ready backends)
