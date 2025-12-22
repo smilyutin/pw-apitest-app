@@ -4,7 +4,7 @@
     "@types/node": "^24.3.0",
     "audit-ci": "^7.1.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "dotenv": "^17.2.1",
