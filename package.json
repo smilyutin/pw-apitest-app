@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "dotenv": "^17.2.1",
-    "playwright": "^1.57.0"
+    "playwright": "^1.58.0"
   },
   "scripts": {
     "test:sec": "npx playwright test tests/security",
