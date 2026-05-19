@@ -44,4 +44,6 @@ await expect(page.getByText('Global Feed')).toBeVisible({ timeout: 10000 });
   await expect(likeButton).toHaveText(/1/, { timeout: 5000 });
 
   console.log(`Global liked article successfully: ${slugId}`);
+
+  
 });

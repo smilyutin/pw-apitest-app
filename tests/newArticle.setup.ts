@@ -6,12 +6,11 @@ import fs from 'fs';
 const slugFile = '.auth/article.json';
 
 setup('create new article', async ({ request }) => {
-  // 1 Generate unique title and slug
+
   const timestamp = Date.now();
   const title = `Like title ${timestamp}`;
   const body = 'This article will be deleted in the test.';
 
-  // 2 POST create article using auth token (via Playwright request)
   const articleResponse = await request.post(
     `${API}/api/articles`,
     {
@@ -34,7 +33,6 @@ setup('create new article', async ({ request }) => {
 
   console.log('Article created:', slugId);
 
-  // 3 Save slug & author for teardown
   const articleData = {
     slugId,
     author: response.article.author.username
