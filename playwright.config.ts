@@ -13,7 +13,7 @@ try {
     console.log('🔹 Loaded token from .auth/user.json');
   }
 } catch {
-  console.warn('⚠️ Token not loaded, setup will run first.');
+  console.warn(' Token not loaded, setup will run first.');
 }
 const { baseUrl } = (() => {
   try { return getCreds(); } catch { return { baseUrl: undefined }; }
@@ -37,7 +37,7 @@ export default defineConfig({
   globalTeardown: require.resolve('./global-teardown.ts'),
 
   projects: [
-    // 🔹 Runs first in CLI
+    //  Runs first in CLI
     {
   name: 'setup',
   testMatch: 'auth.setup.ts',

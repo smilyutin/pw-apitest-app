@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   security-soft:
-    name: Security (soft) – PR
+    name: Security (soft)  PR
     if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -53,7 +53,7 @@ jobs:
           retention-days: 14
 
   security-strict:
-    name: Security (strict) – main/master
+    name: Security (strict)  main/master
     if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') }}
     runs-on: ubuntu-latest
     timeout-minutes: 30

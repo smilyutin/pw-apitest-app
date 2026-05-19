@@ -6,7 +6,7 @@ import { request } from '@playwright/test';
 const API = 'https://conduit-api.bondaracademy.com';
 
 async function globalTeardown() {
-  const slugFile = path.join(__dirname, '.auth', 'globalArticle.json');
+  const slugFile = path.join(__dirname, '.auth', 'article.json');
   const tokenFile = path.join(__dirname, '.auth', 'user.json');
 
   // Guard: only continue if slug + token exist

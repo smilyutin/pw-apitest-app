@@ -35,7 +35,7 @@ function requiresAuth(url: string, method: string): boolean {
 }
 
 // Wrap APIRequestContext to assert Authorization presence
-function wrapWithAuthGuard(ctx: APIRequestContext): APIRequestContext {
+function wrapWithAuthGuard(ctx: APIRequestContext, token?: string): APIRequestContext {
   const METHODS = ['get', 'post', 'put', 'patch', 'delete', 'head', 'fetch'] as const;
 
   return new Proxy(ctx, {
@@ -47,8 +47,8 @@ function wrapWithAuthGuard(ctx: APIRequestContext): APIRequestContext {
           const hasAuth =
             typeof headers.Authorization === 'string' ||
             typeof headers.authorization === 'string' ||
-            // Also consider auth added via context.extraHTTPHeaders
-            false;
+            // Also consider auth added via context.extraHTTPHeaders from the fixture token
+            !!token;
 
           if (requiresAuth(url, options.method ?? (prop === 'fetch' ? 'GET' : prop)) && !hasAuth) {
             throw new Error(
@@ -75,7 +75,7 @@ export const test = base.extend<Fixtures>({
       baseURL: API,
       extraHTTPHeaders: token ? { Authorization: `Token ${token}` } : {},
     });
-    const guarded = wrapWithAuthGuard(ctx);
+    const guarded = wrapWithAuthGuard(ctx, token);
     await use(guarded);
     await ctx.dispose();
   },

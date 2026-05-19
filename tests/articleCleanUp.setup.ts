@@ -40,5 +40,5 @@ teardown('delete article', async ({ request }) => {
 
   // 5 Cleanup slug file
   fs.unlinkSync(slugFile);
-  console.log('🧹 Slug file deleted after cleanup.');
+  console.log(' Slug file deleted after cleanup.');
 });

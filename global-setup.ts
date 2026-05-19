@@ -21,7 +21,7 @@ async function globalSetup() {
 
   //  Assert login worked
   expect(loginResponse.ok()).toBeTruthy();
-  // 🔑 Extract token from response
+  //  Extract token from response
   const loginBody = await loginResponse.json();
   const accessToken = loginBody.user.token;
 
@@ -38,7 +38,7 @@ async function globalSetup() {
 
   fs.mkdirSync('.auth', { recursive: true });                         // Ensure .auth folder exists
   fs.writeFileSync(authFile, JSON.stringify(userData, null, 2));     // Save token to file
-  console.log('✅ Token saved to user.json');
+  console.log(' Token saved to user.json');
 
   //  4. Create a new article with unique title
   const articleResponse = await context.post(
@@ -48,8 +48,7 @@ async function globalSetup() {
         article: {
           title: `Global like title ${Date.now()}`,
           description: "Created via globalSetup",
-          body: "Bondar Academy is a leading platform for efficient education, designed to boost your technical skills and advance your career in Quality Assurance (QA)...",
-          tagList: []
+          body: "Body via GlobalSetup"
         }
       },
       headers: { Authorization: `Token ${accessToken}` }

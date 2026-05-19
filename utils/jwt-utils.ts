@@ -1,4 +1,6 @@
 // utils/jwt-utils.ts
+import { Buffer } from 'node:buffer';
+
 type JwtParts = { header: any; payload: any; signature: string; raw: string };
 
 function b64urlDecode(b64url: string): string {
